@@ -1,0 +1,13 @@
+{
+    "name": "kristianbroholm/kbwp",
+    "description": "Collection of useful methods to make developing WordPress easier",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Kristian Broholm",
+            "email": "kristian.broholm@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {}
+}
