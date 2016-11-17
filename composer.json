@@ -11,6 +11,6 @@
     "minimum-stability": "dev",
     "require": {},
     "autoload": {
-        "psr-4": {"kbwp": "src/"}
+        "psr-4": {"kbwp\\": "src/"}
     }
 }
