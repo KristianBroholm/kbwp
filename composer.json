@@ -1,7 +1,7 @@
 {
     "name": "kristianbroholm/kbwp",
-    "description": "Collection of useful methods to make developing WordPress easier",
-    "license": "MIT",
+    "description": "Collection of useful classes to make developing WordPress more effiecient.",
+    "type": "library",
     "authors": [
         {
             "name": "Kristian Broholm",
@@ -9,5 +9,8 @@
         }
     ],
     "minimum-stability": "dev",
-    "require": {}
+    "require": {},
+    "autoload": {
+        "psr-4": {"kbwp\\": "src/"}
+    }
 }

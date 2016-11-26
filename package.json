@@ -1,0 +1,19 @@
+{
+  "name": "kbwp",
+  "version": "0.0.1",
+  "description": "Collection of useful methods to make developing WordPress easier",
+  "main": "composer.json",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KristianBroholm/kbwp.git"
+  },
+  "author": "Kristian Broholm",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/KristianBroholm/kbwp/issues"
+  },
+  "homepage": "https://github.com/KristianBroholm/kbwp#readme"
+}
