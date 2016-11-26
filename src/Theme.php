@@ -15,12 +15,6 @@ Abstract class Theme {
     
     private $_menus;
     
-    protected function __construct() {
-        
-        add_filter( 'timber_context', array( $this, 'filter_add_custom_header_to_timber_context' ) );
-    }
-    
-    
     /* Adds given menus to Timber Context. Can be done only once.
      * @author kristianb
      * @since   1.0.0
