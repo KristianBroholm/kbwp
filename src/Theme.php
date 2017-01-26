@@ -11,17 +11,10 @@
 namespace kbwp;
 use \TimberMenu, \TimberImage;
 
-Abstract class Theme {
+abstract class Theme {
     
     private $menus;
     public  $url;
-    
-    protected static function __construct() {
-        
-        $this->url = stylesheet_directory_uri();
-        add_filter( 'timber_context', array( $this, 'filter_add_custom_header_to_timber_context' ) );
-    }
-    
     
     /*
      * @author  kristianb
