@@ -12,6 +12,8 @@ namespace kbwp;
 
 class kbwp {
     
+    private function __construct() {}
+    
     public static function uglify( $string ) {
         $string = strtolower( $string );
         $string = str_replace( array(' ','ä','å','ö'), array( '_','a','a','o' ), $string );
