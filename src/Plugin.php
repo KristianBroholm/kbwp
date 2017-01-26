@@ -12,8 +12,14 @@ namespace kbwp;
 
 abstract class Plugin {
     
-    protected function __construct() {
-        flush_rewrite_rules();
+    public function __construct() {
+        
+        register_activation_hook(__FILE__, array($this, 'activation_hook'));
     }
     
+    
+    protected function activation_hook() {
+
+        flush_rewrite_rules();
+    }
 }
