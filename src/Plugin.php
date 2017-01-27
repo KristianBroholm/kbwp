@@ -20,7 +20,7 @@ abstract class Plugin {
     }
     
 
-    protected static function init($dir, $url) {
+    public static function init($dir, $url) {
         
         if ( null == self::$instance ) {
             self::$instance = new self($dir, $url);
