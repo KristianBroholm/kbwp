@@ -11,16 +11,31 @@
 namespace kbwp;
 
 abstract class kbwp {
-
+    
     public static function uglify( $string ) {
         $string = strtolower( $string );
         $string = str_replace( array(' ','ä','å','ö'), array( '_','a','a','o' ), $string );
         return $string;
     }
     
+    
+    /**
+     * Adds actions to WordPress hooks
+     * @author  kristianb
+     * @since   1.0.0
+     * @param   array   $actions    Associative array structured as hook => callback. Defaults empty array.
+     * */
+    public function load_actions($actions = array()) {
+    
+        foreach($actions as $hook => $callback) {
+            add_action($hook, $callback);
+        }
+    }
+    
+    
     /* Read assets from manifest JSON created by rev-module
-     * @author: kristianb
-     * @since:  1.0.0
+     * @author  kristianb
+     * @since   1.0.0
      * @param   $manifest_path  string  Absolute path to manifest.json
      * @return  $assets         array   Returns assets as key-value pairs
      * */
