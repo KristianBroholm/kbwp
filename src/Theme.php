@@ -9,9 +9,8 @@
  * */
 
 namespace kbwp;
-use \TimberMenu, \TimberImage;
 
-abstract class Theme {
+class Theme {
     
     
     /* Enqueues scripts from Typekit and adds Typekits method into head-section
@@ -19,7 +18,7 @@ abstract class Theme {
      * @since   1.0.0
      * @param   $id   string  Typekits ID for fontkit
     */
-    public function wp_enqueue_typekit( $id ) {
+    public function enqueue_typekit( $id ) {
             
         wp_enqueue_script( 'typekit-' . $id, 'https://use.typekit.net/' . $id . '.js' );
         
@@ -44,7 +43,7 @@ abstract class Theme {
      * @since:  1.0.0
      * @param   $stylesheet_url string  Stylesheets URL
      */
-    public function add_editor_style( $stylesheet_url ) {
+    public function enqueue_editor_style( $stylesheet_url ) {
         
         if ( is_admin() ) {
             global $editor_styles;

@@ -10,7 +10,7 @@
 
 namespace kbwp;
 
-abstract class Plugin {
+class Plugin {
 
     private static $instance = null;
     
