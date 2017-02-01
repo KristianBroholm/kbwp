@@ -12,17 +12,21 @@ namespace kbwp;
 
 abstract class Plugin {
 
-    private static $instance = null;
+    private static $instances = array();
     
     public static function init($dir, $url) {
         
+        $class = get_called_class();
+        
+        if ( !self::$instances[$class] ) {
+            self::$instances[$class] = new $class($dir, $url);
+        }
+        
         register_activation_hook(__FILE__, array($this, 'activation_hook'));
         
-        if ( null == self::$instance ) {
-            self::$instance = new self($dir, $url);
-        }
-        return self::$instance;
+        return self::$instances[$class];
     }
+    
     
     protected function activation_hook() {
         flush_rewrite_rules();
