@@ -10,17 +10,13 @@
 
 namespace kbwp;
 
-class Plugin {
+abstract class Plugin {
 
     private static $instance = null;
     
-    private function __construct() {
+    public static function init($dir, $url) {
         
         register_activation_hook(__FILE__, array($this, 'activation_hook'));
-    }
-    
-
-    public static function init($dir, $url) {
         
         if ( null == self::$instance ) {
             self::$instance = new self($dir, $url);
@@ -28,9 +24,7 @@ class Plugin {
         return self::$instance;
     }
     
-    
     protected function activation_hook() {
-
         flush_rewrite_rules();
     }
 }
