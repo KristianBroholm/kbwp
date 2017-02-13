@@ -23,7 +23,8 @@ class Plugin {
     public static function init($dir, $url) {
         
         if ( null == self::$instance ) {
-            self::$instance = new self($dir, $url);
+            $class = get_called_class();
+            self::$instance = new $class($dir, $url);
         }
         return self::$instance;
     }
