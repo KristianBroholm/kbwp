@@ -79,4 +79,26 @@ class Theme {
             echo "<!-- End Facebook Pixel Code -->";
         });
     }
+    
+    
+    /*
+     * @author  kristianb
+     * @since   1.0.0
+     * @param   $menus  assoc_array
+     * */
+    public function register_navigations($menus) {
+         
+        foreach($menus as $menu => $name) {
+            
+            register_nav_menu($menu, $name);
+            
+            if ( class_exists('Timber') ) {
+                add_filter('timber_context', function($menu) {
+                    $data['menu_' . $menu ] = new TimberMenu($menu);
+                    return $data;
+                });
+            }
+        }
+        
+    }
 }
