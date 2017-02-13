@@ -9,6 +9,7 @@
  * */
 
 namespace kbwp;
+use TimberMenu;
 
 class Theme {
     
@@ -91,6 +92,8 @@ class Theme {
         foreach($menus as $menu => $name) {
             
             register_nav_menu($menu, $name);
+            
+            print_r( $menu );
             
             if ( class_exists('Timber') ) {
                 add_filter('timber_context', function($menu) {
