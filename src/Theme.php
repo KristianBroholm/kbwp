@@ -79,3 +79,4 @@ class Theme {
             echo "<!-- End Facebook Pixel Code -->";
         });
     }
+}
