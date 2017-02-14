@@ -13,6 +13,7 @@ use TimberMenu;
 
 class Theme {
     
+    private $_timber_menus;
     
     /* Enqueues scripts from Typekit and adds Typekits method into head-section
      * @author  kristianb
@@ -88,18 +89,34 @@ class Theme {
      * @param   $menus  assoc_array
      * */
     public function register_navigations($menus) {
-         
+        
         foreach($menus as $menu => $name) {
             
             register_nav_menu($menu, $name);
-                        
+            
             if ( class_exists('Timber') ) {
-                add_filter('timber_context', function( $menu ) {
-                    $data['menu_' . $menu ] = new TimberMenu( $menu );
-                    return $data;
-                });
+                $this->_timber_menus[$menu] = new TimberMenu( $menu );
             }
         }
         
+        if ( !has_filter('timber_context', array($this, 'add_menus_to_timber_context')) ) {
+            add_filter('timber_context', array($this, 'add_menus_to_timber_context'));   
+        } else {
+            remove_filter('timber_context', array($this, 'add_menus_to_timber_context'));
+            add_filter('timber_context', array($this, 'add_menus_to_timber_context'));
+        }
+    }
+    
+    
+    /*
+     * @author  kristianb
+     * @since   1.0.0
+     */
+    public function add_menus_to_timber_context($data) {
+        foreach($this->_timber_menus as $slug => $menu ) {
+            $data['menu_' . $slug] = $menu;
+        }
+        
+        return $data;
     }
 }
