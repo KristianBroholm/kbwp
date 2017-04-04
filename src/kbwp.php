@@ -45,7 +45,7 @@ abstract class kbwp {
 
         if ( file_exists($manifest_path) ) {
             $manifest   = file_get_contents($manifest_path, true);
-            $assets     = json_decode($manifest);
+            $assets     = json_decode($manifest, true);
         }
 
         return $assets;
