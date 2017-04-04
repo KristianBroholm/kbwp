@@ -23,11 +23,10 @@ abstract class Plugin {
         }
 
         register_activation_hook(__FILE__, array($this, 'activation_hook'));
-
         return self::$instances[$class];
     }
 
-    protected function activation_hook() {
+    public function activation_hook() {
         flush_rewrite_rules();
     }
 }
