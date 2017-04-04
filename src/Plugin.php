@@ -22,7 +22,7 @@ abstract class Plugin {
             self::$instances[$class] = new $class($dir, $url);
         }
 
-        register_activation_hook(__FILE__, array($this, 'activation_hook'));
+        register_activation_hook(__FILE__, array($class, 'activation_hook'));
         return self::$instances[$class];
     }
 
