@@ -18,7 +18,7 @@ abstract class Plugin {
 
         $class = get_called_class();
 
-        if ( !isset(self::$instances[$class]) ) {
+        if ( !array_key_exists($class, self::$instances) ) {
             self::$instances[$class] = new $class($dir, $url);
         }
 
