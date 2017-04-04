@@ -11,25 +11,37 @@
 namespace kbwp;
 use TimberMenu;
 
-class Theme {
-    
+abstract class Theme {
+
     private $_timber_menus;
-    
+    private static $instances = array();
+
+    public static function init($dir, $url) {
+
+        $class = get_called_class();
+
+        if ( !array_key_exists($class, self::$instances) ) {
+            self::$instances[$class] = new $class($dir, $url);
+        }
+
+        return self::$instances[$class];
+    }
+
     /* Enqueues scripts from Typekit and adds Typekits method into head-section
      * @author  kristianb
      * @since   1.0.0
      * @param   $id   string  Typekits ID for fontkit
     */
     public function enqueue_typekit( $id ) {
-            
+
         wp_enqueue_script( 'typekit-' . $id, 'https://use.typekit.net/' . $id . '.js' );
-        
+
         if ( !has_action( 'wp_head', 'typekit_init' ) ) {
             add_action( 'wp_head', array( $this, 'typekit_init' ) );
         }
     }
-    
-    
+
+
     /* Inits Typekit
      * @author  kristianb
      * @since   1.0.0
@@ -38,7 +50,7 @@ class Theme {
 
         echo "<script>\n//Init typekit\ntry{Typekit.load({ async: true });}catch(e){}\n</script>";
     }
-    
+
 
     /**
      * @author: kristianb
@@ -46,7 +58,7 @@ class Theme {
      * @param   $stylesheet_url string  Stylesheets URL
      */
     public function enqueue_editor_style( $stylesheet_url ) {
-        
+
         if ( is_admin() ) {
             global $editor_styles;
             $editor_styles = (array) $editor_styles;
@@ -54,15 +66,15 @@ class Theme {
             $editor_styles = array_merge( $editor_styles, $stylesheet );
         }
     }
-    
-    
+
+
     /**
      * @author  kristianb
      * @since   1.0.0
      * @param   $id
      **/
     public function add_facebook_pixel( $id ) {
-        
+
         add_action( 'wp_head', function( $id ) {
             echo '<!-- Facebook Pixel Code -->';
             echo '<script>';
@@ -81,33 +93,33 @@ class Theme {
             echo "<!-- End Facebook Pixel Code -->";
         });
     }
-    
-    
+
+
     /*
      * @author  kristianb
      * @since   1.0.0
      * @param   $menus  assoc_array
      * */
     public function register_navigations($menus) {
-        
+
         foreach($menus as $menu => $name) {
-            
+
             register_nav_menu($menu, $name);
-            
+
             if ( class_exists('Timber') ) {
                 $this->_timber_menus[$menu] = new TimberMenu( $menu );
             }
         }
-        
+
         if ( !has_filter('timber_context', array($this, 'add_menus_to_timber_context')) ) {
-            add_filter('timber_context', array($this, 'add_menus_to_timber_context'));   
+            add_filter('timber_context', array($this, 'add_menus_to_timber_context'));
         } else {
             remove_filter('timber_context', array($this, 'add_menus_to_timber_context'));
             add_filter('timber_context', array($this, 'add_menus_to_timber_context'));
         }
     }
-    
-    
+
+
     /*
      * @author  kristianb
      * @since   1.0.0
@@ -116,7 +128,7 @@ class Theme {
         foreach($this->_timber_menus as $slug => $menu ) {
             $data['menu_' . $slug] = $menu;
         }
-        
+
         return $data;
     }
 }
