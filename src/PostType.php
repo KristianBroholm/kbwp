@@ -20,7 +20,7 @@ class PostType {
     public $settings;
     public $labels;
 
-    public function($singular_name, $plural_name = null, $user_settings = array(), $user_labels = array(), $is_public = true) {
+    public function __construct($singular_name, $plural_name = null, $user_settings = array(), $user_labels = array(), $is_public = true) {
 
         $this->name     = ucfirst($singular_name);
 
