@@ -12,26 +12,21 @@ namespace kbwp;
 
 abstract class kbwp {
 
-    public static function uglify( $string ) {
+    public static function slugify($string) {
         $string = strtolower( $string );
         $string = str_replace( array(' ','ä','å','ö'), array( '_','a','a','o' ), $string );
         return $string;
     }
 
-
-    /**
-     * Adds actions to WordPress hooks
-     * @author  kristianb
-     * @since   1.0.0
-     * @param   array   $actions    Associative array structured as hook => callback. Defaults empty array.
-     * */
-    public static function load_actions($actions = array()) {
-
-        foreach($actions as $hook => $callback) {
-            add_action($hook, $callback);
-        }
+    public static function pluralize($string) {
+        $string = $string + . 't';
+        return $string;
     }
 
+    public static function partitize($string) {
+
+        return $string;
+    }
 
     /* Read assets from manifest JSON created by rev-module
      * @author  kristianb
