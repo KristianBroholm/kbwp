@@ -30,22 +30,22 @@ class PostType {
             $this->plural   = kbwp::pluralize($this->name);
         }
 
-        $this->partitive = kbwp::partitize($name);
+        $this->partitive = kbwp::partitize($this->name);
 
         $this->slug     = kbwp::slugify($this->name);
 
         $labels = array(
             'name'                  => $this->plural,
             'singular_name'         => $this->name,
-            'add_new_item'          => 'Lisää uusi ' . $this->name,
-            'edit_item'             => 'Muokkaa ' . $this->partitive,
-            'new_item'              => 'Uusi ' . $this->name,
-            'view_item'             => 'Näytä ' . $this->name,
-            'view_items'            => 'Näytä ' . $this->plural,
-            'search_items'          => 'Etsi ' . $this->partitive,
-            'not_found'             => 'Yhtään ' . $this->partitive . ' ei löytynyt.',
-            'not_found_in_trash'    => 'Yhtään ' . $this->partitive . ' ei löytynyt roskakorista',
-            'all_items'             => 'Kaikki ' . $this->plural
+            'add_new_item'          => 'Lisää uusi ' . strtolower($this->name),
+            'edit_item'             => 'Muokkaa ' . strtolower($this->partitive),
+            'new_item'              => 'Uusi ' . strtolower($this->name),
+            'view_item'             => 'Näytä ' . strtolower($this->name),
+            'view_items'            => 'Näytä ' . strtolower($this->name),
+            'search_items'          => 'Etsi ' . strtolower($this->partitive),
+            'not_found'             => 'Yhtään ' . strtolower($this->partitive) . ' ei löytynyt.',
+            'not_found_in_trash'    => 'Yhtään ' . strtolower($this->partitive) . ' ei löytynyt roskakorista',
+            'all_items'             => 'Kaikki ' . strtolower($this->plural)
         );
 
         $this->labels = array_merge($labels, $user_labels);
