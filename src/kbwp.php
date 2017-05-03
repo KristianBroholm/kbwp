@@ -19,7 +19,7 @@ abstract class kbwp {
     }
 
     public static function pluralize($string) {
-        $string = $string + . 't';
+        $string = $string . 't';
         return $string;
     }
 
