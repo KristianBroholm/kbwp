@@ -69,6 +69,4 @@ class PostType {
 
         register_post_type($this->slug, $this->settings);
     }
-
-    public func
 }
