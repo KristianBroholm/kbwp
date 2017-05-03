@@ -38,7 +38,7 @@ class PostType {
             'name'                  => $this->plural,
             'singular_name'         => $this->name,
             'add_new_item'          => 'Lisää uusi ' . $this->name,
-            'edit_item'             => 'Muokkaa ' $this->partitive
+            'edit_item'             => 'Muokkaa ' $this->partitive,
             'new_item'              => 'Uusi ' . $this->name,
             'view_item'             => 'Näytä ' . $this->name,
             'view_items'            => 'Näytä ' . $this->plural,
