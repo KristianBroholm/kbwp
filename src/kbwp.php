@@ -24,6 +24,20 @@ abstract class kbwp {
     }
 
     public static function partitize($string) {
+        $string = strtolower($string);
+        $last_character = substr($string, -1);
+
+        switch($last_character) {
+            case 'ä':
+                $string = $string . 'ä';
+            break;
+            case 'ö':
+                $string = $string . 'tä';
+            break;
+            default:
+                $string = $string . 'a';
+            break;
+        }
 
         return $string;
     }

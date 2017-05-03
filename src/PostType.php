@@ -30,7 +30,7 @@ class PostType {
             $this->plural   = kbwp::pluralize($this->name);
         }
 
-        $this->partitive = kbwp::partitize($this->name);
+        $this->partitive = kbwp::partitize($name);
 
         $this->slug     = kbwp::slugify($this->name);
 
