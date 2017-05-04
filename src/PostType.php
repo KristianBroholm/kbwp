@@ -1,7 +1,7 @@
 <?php
 /*
  * @file:           PostType.php
- * @description:    Collection of methods for creating new
+ * @description:    Collection of methods for creating new Post Types
  * @package:        kbwp
  * @author:         kristianb
  * @email:          kristian.broholm@gmail.com
@@ -27,46 +27,87 @@ class PostType {
             $this->plural   = ucfirst($name[1]);
         } else {
             $this->name     = ucfirst($name);
-            $this->plural   = ucfirst(kbwp::pluralize($this->name));
+            $this->plural   = ucfirst($name);
         }
 
-        $this->partitive = kbwp::partitize($this->name);
+        $this->slug = kbwp::slugify($handle);
 
-        $this->slug     = kbwp::slugify($handle);
-
-        $labels = array(
-            'name'                  => $this->plural,
-            'singular_name'         => $this->name,
-            'add_new_item'          => 'Lisää uusi ' . mb_strtolower($this->name),
-            'edit_item'             => 'Muokkaa ' . mb_strtolower($this->partitive),
-            'new_item'              => 'Uusi ' . mb_strtolower($this->name),
-            'view_item'             => 'Näytä ' . mb_strtolower($this->name),
-            'view_items'            => 'Näytä ' . mb_strtolower($this->name),
-            'search_items'          => 'Etsi ' . mb_strtolower($this->partitive),
-            'not_found'             => 'Yhtään ' . mb_strtolower($this->partitive) . ' ei löytynyt.',
-            'not_found_in_trash'    => 'Yhtään ' . mb_strtolower($this->partitive) . ' ei löytynyt roskakorista',
-            'all_items'             => 'Kaikki ' . mb_strtolower($this->plural)
+        $default_labels = array(
+            'name' => $this->plural,
         );
 
-        $this->labels = array_merge($labels, $user_labels);
+        $this->labels = array_merge($default_labels, $user_labels);
 
-        $settings = array(
+        $default_settings = array(
             'labels'        => $this->labels,
+            'supports'      => array(
+                'title'
+            ),
+            'taxonomies'    => array()
         );
 
         if($is_public) {
-            $defaults = array_merge($settings, array(
+            $defaults = array_merge($default_settings, array(
                 'public'    => true
             ));
         } else {
-            $defaults = array($settings, array(
+            $defaults = array($default_settings, array(
                 'public'    => false,
                 'show_ui'   => true,
             ));
         }
 
         $this->settings = array_merge($defaults, $user_settings);
+    }
 
-        register_post_type($this->slug, $this->settings);
+    public function supports($feature = '') {
+        if (!is_array($feature)) {
+            $features[] = $feature;
+        } else {
+            $features = $feature;
+        }
+
+        foreach($features as $feature) {
+            if (!$this->has_support_for($feature)) {
+                $this->settings['supports'][] = $feature;
+            }
+        }
+    }
+
+    public function has_support_for($feature) {
+        if (is_array($this->settings['supports'])) {
+            if (in_array($feature, $this->settings['supports'])) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public function does_not_support($feature = '') {
+
+        if (!is_array($feature)) {
+            $features[] = $feature;
+        } else {
+            $features = $feature;
+        }
+
+        foreach($features as $feature) {
+            if ($this->has_support_for($feature)) {
+                foreach($this->settings['supports'] as $key => $value) {
+                    if ($value == $feature) {
+                        unset($this->settings['supports'][$key]);
+                    }
+                }
+            }
+        }
+    }
+
+    public function get_settings() {
+        return $this->settings;
+    }
+
+    public function __destruct() {
+        register_post_type($this->slug, $this->get_settings());
+        unset($this);
     }
 }
