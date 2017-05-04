@@ -20,38 +20,38 @@ class PostType {
     public $settings;
     public $labels;
 
-    public function __construct($singular_name, $plural_name = null, $user_settings = array(), $user_labels = array(), $is_public = true) {
+    public function __construct($handle, $name, $is_public = true, $user_settings = array(), $user_labels = array()) {
 
-        $this->name     = ucfirst($singular_name);
-
-        if ($plural_name) {
-            $this->plural   = ucfirst($plural_name);
+        if (is_array($name)) {
+            $this->name     = ucfirst($name[0]);
+            $this->plural   = ucfirst($name[1]);
         } else {
-            $this->plural   = kbwp::pluralize($this->name);
+            $this->name     = ucfirst($name);
+            $this->plural   = ucfirst(kbwp::pluralize($this->name));
         }
 
         $this->partitive = kbwp::partitize($this->name);
 
-        $this->slug     = kbwp::slugify($this->name);
+        $this->slug     = kbwp::slugify($handle);
 
         $labels = array(
             'name'                  => $this->plural,
             'singular_name'         => $this->name,
-            'add_new_item'          => 'Lisää uusi ' . strtolower($this->name),
-            'edit_item'             => 'Muokkaa ' . strtolower($this->partitive),
-            'new_item'              => 'Uusi ' . strtolower($this->name),
-            'view_item'             => 'Näytä ' . strtolower($this->name),
-            'view_items'            => 'Näytä ' . strtolower($this->name),
-            'search_items'          => 'Etsi ' . strtolower($this->partitive),
-            'not_found'             => 'Yhtään ' . strtolower($this->partitive) . ' ei löytynyt.',
-            'not_found_in_trash'    => 'Yhtään ' . strtolower($this->partitive) . ' ei löytynyt roskakorista',
-            'all_items'             => 'Kaikki ' . strtolower($this->plural)
+            'add_new_item'          => 'Lisää uusi ' . mb_strtolower($this->name),
+            'edit_item'             => 'Muokkaa ' . mb_strtolower($this->partitive),
+            'new_item'              => 'Uusi ' . mb_strtolower($this->name),
+            'view_item'             => 'Näytä ' . mb_strtolower($this->name),
+            'view_items'            => 'Näytä ' . mb_strtolower($this->name),
+            'search_items'          => 'Etsi ' . mb_strtolower($this->partitive),
+            'not_found'             => 'Yhtään ' . mb_strtolower($this->partitive) . ' ei löytynyt.',
+            'not_found_in_trash'    => 'Yhtään ' . mb_strtolower($this->partitive) . ' ei löytynyt roskakorista',
+            'all_items'             => 'Kaikki ' . mb_strtolower($this->plural)
         );
 
         $this->labels = array_merge($labels, $user_labels);
 
         $settings = array(
-            'labels'    => $this->labels,
+            'labels'        => $this->labels,
         );
 
         if($is_public) {

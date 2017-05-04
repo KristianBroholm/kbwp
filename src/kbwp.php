@@ -12,31 +12,76 @@ namespace kbwp;
 
 abstract class kbwp {
 
+    public static function has_scands($string) {
+        $matches = preg_match('/^[a-zA-ZäöåÄÖÅ]+$/', $string);
+
+        if ($matches) {
+            return true;
+        }
+        return false;
+    }
+
     public static function slugify($string) {
-        $string = strtolower( $string );
+        $string = mb_strtolower( $string );
         $string = str_replace( array(' ','ä','å','ö'), array( '_','a','a','o' ), $string );
         return $string;
     }
 
     public static function pluralize($string) {
-        $string = $string . 't';
-        return $string;
+        $string     = mb_strtolower($string);
+
+        if (mb_substr($string, -2) == 'te') {
+            $string = mb_substr($string, 0 , -2) . 'tteet';
+        } elseif (mb_substr($string, -2) == 'de') {
+            $string = mb_substr($string, 0, -2) . 'teet';
+        } elseif (mb_substr($string, -2) == 'ke') {
+            $string = mb_substr($string, 0, -2) . 'kkeet';
+        } elseif (mb_substr($string, -3) == 'nen') {
+            $string = mb_substr($string, 0, -3) . 'set';
+        } elseif (mb_substr($string, -2) == 'en') {
+            $string = mb_substr($string, 0, -2) . 'et';
+        } elseif (mb_substr($string, -1) == 's' ) {
+            if (mb_substr($string, -4) == 'rves') {
+                $string = mb_substr($string, 0 , -1) . 'et';
+            } else {
+                $string = mb_substr($string, 0, -1) . 'kset';
+            }
+        } elseif (mb_substr($string, -3) == 'kko') {
+            $string = mb_substr($string, 0, -3) . 'kot';
+        } elseif (mb_substr($string, -3) == 'kkö') {
+            $string = mb_substr($string, 0, -3) . 'köt';
+        } elseif (mb_substr($string, -3) == 'kkä') {
+            $string = mb_substr($string, 0, -3) . 'kät';
+        } else {
+            $string = $string . 't';
+        }
+
+        return mb_strtoupper(mb_substr($string, 0, 1)).mb_strtolower(mb_substr($string, 1));
     }
 
     public static function partitize($string) {
-        $string = strtolower($string);
-        $last_character = substr($string, -1);
+        $string = mb_strtolower($string);
 
-        switch($last_character) {
-            case 'ä':
-                $string = $string . 'ä';
-            break;
-            case 'ö':
+        if (mb_substr($string, -1) == 'ä') {
+            $string = $string . 'ä';
+        } elseif (mb_substr($string, -1) == 'ö') {
+            $string = $string . 'tä';
+        } elseif (mb_substr($string, -1) == 'e') {
+            if (self::has_scands($string)) {
+                $string = $string . 'ttä';
+            } else {
+                $string = $string . 'tta';
+            }
+        } elseif (mb_substr($string, -1) == 's') {
+            if (mb_substr($string, -3) == 'ves') {
                 $string = $string . 'tä';
-            break;
-            default:
-                $string = $string . 'a';
-            break;
+            } else {
+                $string = $string . 'ta';
+            }
+        } elseif (mb_substr($string, -3) == 'nen') {
+            $string = mb_substr($string, 0, -3) . 'sta';
+        } else {
+            $string = $string . 'a';
         }
 
         return $string;
