@@ -12,36 +12,22 @@ namespace kbwp;
 
 class PostType {
 
-    public $name;
-    public $plural;
-    public $partitive;
-    public $slug;
-    public $defaults;
-    public $settings;
-    public $labels;
+    private $slug;
+    private $settings;
 
     /**
      * Creates new Post Type to be registered.
      * @param string        $handle        Slug for post type eg. 'post' or 'page'.
-     * @param string|array  $name          Name of the post type. First value of the array is used as singular_name and second value as plurarl_name.
-     * @param boolean       $is_public     Defines should post type be public or not. Private post types are still visible on the admin side by default.
-     * @param array         $user_settings Custom settings for the post type
      * @param array         $user_labels   Custom labels for the post type.
+     * @param array         $user_settings Custom settings for the post type
+     * @param boolean       $is_public     Defines should post type be public or not. Private post types are still visible on the admin side by default.
      */
-    public function __construct($handle = '', $name = '', $is_public = true, $user_settings = array(), $user_labels = array()) {
-
-        if (is_array($name)) {
-            $this->name     = ucfirst($name[0]);
-            $this->plural   = ucfirst($name[1]);
-        } else {
-            $this->name     = ucfirst($name);
-            $this->plural   = ucfirst($name);
-        }
+    public function __construct($handle = '', $user_labels = array(), $user_settings = array(), $is_public = true ) {
 
         $this->slug = kbwp::slugify($handle);
 
         $default_labels = array(
-            'name' => $this->plural,
+            'name' => ucfirst($handle)
         );
 
         $this->labels = array_merge($default_labels, $user_labels);
@@ -54,14 +40,15 @@ class PostType {
             'taxonomies'    => array()
         );
 
-        if($is_public) {
+        if ($is_public) {
             $defaults = array_merge($default_settings, array(
                 'public'    => true
             ));
         } else {
-            $defaults = array($default_settings, array(
-                'public'    => false,
-                'show_ui'   => true,
+            $defaults = array_merge($default_settings, array(
+                'public'        => false,
+                'show_ui'       => true,
+                'show_in_menu'  => true
             ));
         }
 
@@ -160,7 +147,7 @@ class PostType {
      * Returns Post Type's settings.
      * @return array $this->settings
      */
-    private function get_settings() {
+    public function get_settings() {
         return $this->settings;
     }
 
