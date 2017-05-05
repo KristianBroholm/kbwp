@@ -56,6 +56,7 @@ class PostType {
     }
 
     public function add_support($feature = '') {
+
         if (!is_array($feature)) {
             $features[] = $feature;
         } else {
@@ -70,6 +71,7 @@ class PostType {
     }
 
     public function has_support($feature) {
+
         if (is_array($this->settings['supports'])) {
             if (in_array($feature, $this->settings['supports'])) {
                 return true;
@@ -98,6 +100,7 @@ class PostType {
     }
 
     public function has_taxonomy($taxonomy) {
+
         if (array_key_exists('taxonomies', $this->settings)) {
             if (in_array($taxonomy, $this->settings['taxonomies'])) {
                 return true;
@@ -126,6 +129,7 @@ class PostType {
      * @param  string|array     $taxonomy Taxonomies to be removed
      */
     public function remove_taxonomy($taxonomy = '') {
+
         if (is_array($taxonomy)) {
             $taxonomies = $taxonomy;
         } else {
@@ -144,6 +148,7 @@ class PostType {
     }
 
     public function register_taxonomy($handle, $user_labels = array(), $user_settings = array(), $is_public = true) {
+
         $taxonomy = new Taxonomy($handle, $this->slug, $user_labels, $user_settings, $is_public);
         return $taxonomy;
     }
@@ -153,6 +158,7 @@ class PostType {
      * @return array $this->settings
      */
     public function get_settings() {
+
         return $this->settings;
     }
 
@@ -160,7 +166,8 @@ class PostType {
      * Registers the post type by using WP's register_post_type -function.
      */
     public function __destruct() {
-        register_post_type($this->slug, $this->get_settings());
+
+        register_post_type($this->slug, $this->settings);
         unset($this);
     }
 }
