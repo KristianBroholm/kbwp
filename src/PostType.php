@@ -143,6 +143,11 @@ class PostType {
         }
     }
 
+    public function register_taxonomy($handle, $user_labels = array(), $user_settings = array(), $is_public = true) {
+        $taxonomy = new Taxonomy($handle, $this->slug, $user_labels, $user_settings, $is_public);
+        return $taxonomy;
+    }
+
     /**
      * Returns Post Type's settings.
      * @return array $this->settings
