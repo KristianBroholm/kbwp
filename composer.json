@@ -9,9 +9,6 @@
         }
     ],
     "minimum-stability": "dev",
-    "require": {
-        "timber/timber": "^1.2"
-    },
     "autoload": {
         "psr-4": {"kbwp\\": "src/"}
     }

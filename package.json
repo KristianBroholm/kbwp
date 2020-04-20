@@ -1,6 +1,6 @@
 {
   "name": "kbwp",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Collection of useful methods to make developing WordPress easier",
   "main": "composer.json",
   "scripts": {
