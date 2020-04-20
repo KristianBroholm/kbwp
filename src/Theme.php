@@ -30,9 +30,9 @@ abstract class Theme extends Extension
   }
 
 
-  public function addImageSize(string $name, int $width, int $height, array $crop = false)
+  public function addImageSize($name, int $width, int $height, $crop = false)
   {
-    add_image_size(string $name, int $width, int $height, bool|array $crop = false);
+    add_image_size($name, $width, $height, $crop);
     return $this;
   }
 
@@ -47,8 +47,9 @@ abstract class Theme extends Extension
   }
 
 
-  public function addSupport($feature, $options = null)
+  public function addSupport($feature, $options = array())
   {
+
     $this->actionAfterSetup(function() use ($feature, $options) {
 
       if ($options) {
