@@ -23,20 +23,27 @@ abstract class Theme extends Extension
 
   private function actionAfterSetup($function)
   {
+    add_action('after_setup_theme', function() use ($function) {
+      $function();
+    });
+    return $this;
+  }
 
-      add_action('after_setup_theme', function() use ($function) {
-          $function();
-      });
-      return $this;
+
+  public function addImageSize(string $name, int $width, int $height, bool|array $crop = false)
+  {
+    add_image_size(string $name, int $width, int $height, bool|array $crop = false);
+    return $this;
   }
 
 
   public function addNavmenus($locations = array())
   {
-        $this->actionAfterSetup(function() use ($locations){
-            register_nav_menus($locations);
-        });
-        return $this;
+      $this->actionAfterSetup(function() use ($locations){
+
+        register_nav_menus($locations);
+      });
+      return $this;
   }
 
 
