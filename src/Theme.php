@@ -30,7 +30,7 @@ abstract class Theme extends Extension
   }
 
 
-  public function addImageSize(string $name, int $width, int $height, bool|array $crop = false)
+  public function addImageSize(string $name, int $width, int $height, array $crop = false)
   {
     add_image_size(string $name, int $width, int $height, bool|array $crop = false);
     return $this;
