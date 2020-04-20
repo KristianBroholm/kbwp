@@ -37,7 +37,7 @@ abstract class Theme extends Extension
   }
 
 
-  public function addNavmenus($locations = array())
+  public function addNavigations($locations = array())
   {
       $this->actionAfterSetup(function() use ($locations){
 

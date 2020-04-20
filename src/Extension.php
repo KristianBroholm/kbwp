@@ -6,7 +6,7 @@ namespace kbwp;
 abstract class Extension
 {
 
-  public function addStylesheet($handle, $src = '', $deps = array(), $version = false, $in_footer = false)
+  public function addStyle($handle, $src = '', $deps = array(), $version = false, $in_footer = false)
   {
     wp_enqueue_script($name, $src, $deps, $version, $in_footer);
   }
