@@ -10,10 +10,11 @@
 
 namespace kbwp;
 
-class PostType {
-
-    private $slug;
-    private $settings;
+class PostType
+{
+    protected $_slug;
+    protected $_settings;
+    protected $_labels;
 
     /**
      * Creates new Post Type to be registered.
@@ -22,18 +23,18 @@ class PostType {
      * @param array         $user_settings Custom settings for the post type
      * @param boolean       $is_public     Defines should post type be public or not. Private post types are still visible on the admin side by default.
      */
-    public function __construct($handle = '', $user_labels = array(), $user_settings = array(), $is_public = true ) {
-
-        $this->slug = kbwp::slugify($handle);
+    public function __construct($handle = '', $user_labels = array(), $user_settings = array(), $is_public = true )
+    {
+        $this->_slug = kbwp::slugify($handle);
 
         $default_labels = array(
             'name' => ucfirst($handle)
         );
 
-        $this->labels = array_merge($default_labels, $user_labels);
+        $this->_labels = array_merge($default_labels, $user_labels);
 
         $default_settings = array(
-            'labels'        => $this->labels,
+            'labels'        => $this->_labels,
             'supports'      => array(
                 'title'
             ),
@@ -52,11 +53,12 @@ class PostType {
             ));
         }
 
-        $this->settings = array_merge($defaults, $user_settings);
+        $this->_settings = array_merge($defaults, $user_settings);
     }
 
-    public function add_support($feature = '') {
 
+    public function addSupport($feature = '')
+    {
         if (!is_array($feature)) {
             $features[] = $feature;
         } else {
@@ -64,24 +66,26 @@ class PostType {
         }
 
         foreach($features as $feature) {
-            if (!$this->has_support($feature)) {
-                $this->settings['supports'][] = $feature;
+            if (!$this->hasSupport($feature)) {
+                $this->_settings['supports'][] = $feature;
             }
         }
     }
 
-    public function has_support($feature) {
 
-        if (is_array($this->settings['supports'])) {
-            if (in_array($feature, $this->settings['supports'])) {
+    public function hasSupport($feature)
+    {
+        if (is_array($this->_settings['supports'])) {
+            if (in_array($feature, $this->_settings['supports'])) {
                 return true;
             }
         }
         return false;
     }
 
-    public function remove_support($feature = '') {
 
+    public function removeSupport($feature = '')
+    {
         if (!is_array($feature)) {
             $features[] = $feature;
         } else {
@@ -89,28 +93,30 @@ class PostType {
         }
 
         foreach($features as $feature) {
-            if ($this->has_support($feature)) {
-                foreach($this->settings['supports'] as $key => $value) {
+            if ($this->hasSupport($feature)) {
+                foreach($this->_settings['supports'] as $key => $value) {
                     if ($value == $feature) {
-                        unset($this->settings['supports'][$key]);
+                        unset($this->_settings['supports'][$key]);
                     }
                 }
             }
         }
     }
 
-    public function has_taxonomy($taxonomy) {
 
-        if (array_key_exists('taxonomies', $this->settings)) {
-            if (in_array($taxonomy, $this->settings['taxonomies'])) {
+    public function hasTaxonomy($taxonomy)
+    {
+        if (array_key_exists('taxonomies', $this->_settings)) {
+            if (in_array($taxonomy, $this->_settings['taxonomies'])) {
                 return true;
             }
         }
         return false;
     }
 
-    public function add_taxonomy($taxonomy = '') {
 
+    public function addTaxonomy($taxonomy = '')
+    {
         if (is_array($taxonomy)) {
             $taxonomies = $taxonomy;
         } else {
@@ -119,17 +125,14 @@ class PostType {
 
         foreach($taxonomies as $taxonomy) {
             if (!$this->has_taxonomy($taxonomy)) {
-                $this->settings['taxonomies'][] = $taxonomy;
+                $this->_settings['taxonomies'][] = $taxonomy;
             }
         }
     }
 
-    /**
-     * Removes given taxonomy or taxonomies
-     * @param  string|array     $taxonomy Taxonomies to be removed
-     */
-    public function remove_taxonomy($taxonomy = '') {
 
+    public function removeTaxonomy($taxonomy = '')
+    {
         if (is_array($taxonomy)) {
             $taxonomies = $taxonomy;
         } else {
@@ -137,37 +140,37 @@ class PostType {
         }
 
         foreach($taxonomies as $taxonomy) {
-            if ($this->has_taxonomy($taxonomy)) {
-                foreach($this->settings['taxonomies'] as $key => $value) {
+            if ($this->hasTaxonomy($taxonomy)) {
+                foreach($this->_settings['taxonomies'] as $key => $value) {
                     if ($value == $taxonomy) {
-                        unset($this->settings['taxonomies'][$key]);
+                        unset($this->_settings['taxonomies'][$key]);
                     }
                 }
             }
         }
     }
 
-    public function register_taxonomy($handle, $user_labels = array(), $user_settings = array(), $is_public = true) {
 
-        $taxonomy = new Taxonomy($handle, $this->slug, $user_labels, $user_settings, $is_public);
+    public function createTaxonomy($handle, $user_labels = array(), $user_settings = array(), $is_public = true)
+    {
+        $taxonomy = new Taxonomy($handle, $this->_slug, $user_labels, $user_settings, $is_public);
         return $taxonomy;
     }
 
-    /**
-     * Returns Post Type's settings.
-     * @return array $this->settings
-     */
-    public function get_settings() {
 
-        return $this->settings;
+    public function getSettings()
+    {
+        return $this->_settings;
     }
 
-    /**
-     * Registers the post type by using WP's register_post_type -function.
-     */
-    public function __destruct() {
 
-        register_post_type($this->slug, $this->settings);
-        unset($this);
+    public function register()
+    {
+        add_action('init', array($this, 'init'));
+    }
+
+
+    public function init() {
+      register_post_type($this->_slug, $this->_settings);
     }
 }

@@ -5,86 +5,40 @@ use Timber\Timber as Timber, \TimberMenu;
 
 class Theme extends Extension
 {
-  public $_locale;
-  public $_menus;
+  private $_menus = array();
   public $_url;
   public $_directory;
+  public $_locale;
   public $_languageFolder;
 
-  private function actionAfterSetup($function)
+  protected function __construct()
   {
-    add_action('after_setup_theme', function() use ($function) {
-      $function();
-    });
-    return $this;
-  }
-
-
-  private function loadTextDomain ()
-  {
-    $this->actionAfterSetup( function() {
-      load_theme_textdomain( $this->_locale, $this->_directory . $this->_directory . '/' . $this->_languageFolder );
-    });
-  }
-
-
-  public function __construct($locale, $languageFolder = 'lang')
-  {
-    // Define properties
-    $this->_locale          = $locale;
-    $this->_menus           = array();
     $this->_url             = get_stylesheet_directory_uri();
     $this->_directory       = get_template_directory();
-    $this->_languageFolder  = $languageFolder;
-
-    // Define supported features
-    $this->addSupport('title-tag')
-         ->addSupport('custom-logo')
-         ->addSupport('post-thumbnails')
-         ->addSupport('customize-selective-refresh-widgets')
-         ->addSupport('html5', [
-             'search-form',
-             'comment-form',
-             'comment-list',
-             'gallery',
-             'caption'
-         ]);
-
-    $this->loadTextDomain();
+    $this->_languageFolder  = '';    
   }
 
 
-  public function addImageSize($name, $width = 0, $height = 0, $crop = false)
+  public function loadTextDomain($locale = '', $path = 'lang')
   {
-    $this->actionAfterSetup(function() use ($name, $width, $height, $crop){
-      add_image_size($name, $width, $height, $crop);
-    });
-    return $this;
+    $this->_locale = $locale;
+    $this->_languageFolder = $path;
+    load_theme_textdomain($this->_locale, $this->_languageFolder);
   }
 
 
-  public function addNavigation($location, $name)
+  public function addNavigationMenu($handle, $menu = '')
   {
-    $this->actionAfterSetup(function() use ($location, $name) {
-      register_nav_menu($location, $name);
-    });
-    $this->_menus[$location] = $name;
-  }
-
-
-  public function addNavigations($locations = array())
-  {
-    $this->actionAfterSetup(function() use ($locations)
+    if (is_array($handle))
     {
-      register_nav_menus($locations);
-    });
+      foreach($handle as $handle => $menu)
+      {
+        $this->_menus[$handle] = [$handle => $menu];
 
-    foreach($locations as $location => $name)
-    {
-      $this->_menus[$location] = $name;
+      }
+    } elseif (!empty($handle)) {
+      $this->_menus[$handle] = [$handle => $menu];
     }
-
-    return $this;
   }
 
 
@@ -94,57 +48,32 @@ class Theme extends Extension
   }
 
 
-  public function addSupport($feature, $options = array())
+  public static function load()
   {
-    $this->actionAfterSetup(function() use ($feature, $options)
-    {
-      if ($options) {
-        add_theme_support($feature, $options);
-      } else {
-        add_theme_support($feature);
-      }
-    });
-    return $this;
+    $class = get_called_class();
+    $theme = new $class();
+    $theme->loadNavigationMenus();
+    parent::load();
   }
 
 
-  public function filter_add_navigations_to_timber_context($timber_context)
+  private function loadNavigationMenus() {
+    $class = get_called_class();
+    $theme = new $class();
+
+    add_action('after_setup_theme', array($theme, 'registerNavigationMenus'));
+  }
+
+
+  public function registerNavigationMenus()
   {
-    if (class_exists('\Timber\Menu') && isset($this->_menus))
+    foreach($this->_menus as $menu)
     {
-      foreach ($this->_menus as $location => $name)
+      foreach($menu as $handle => $name)
       {
-          $timber_context['menu'][$location] = new \Timber\Menu( $name );
+        register_nav_menu($handle, $name);
       }
     }
-    return $timber_context;
   }
 
-
-  public function removeImageSize($name)
-  {
-    $this->actionAfterSetup(function() use ($name){
-      remove_image_size($name);
-    });
-    return $this;
-  }
-
-
-  public function removeNavigation($location)
-  {
-    $this->actionAfterSetup(function() use ($location){
-      unregister_nav_menu($location);
-    });
-    unset($this->_menus[$location]);
-    return $this;
-  }
-
-
-  public function removeSupport($feature)
-  {
-    $this->actionAfterSetup(function() use ($feature){
-      remove_theme_support($feature);
-    });
-    return $this;
-  }
 }
