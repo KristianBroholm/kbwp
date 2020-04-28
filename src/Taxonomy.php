@@ -1,24 +1,41 @@
 <?php
-
 namespace kbwp;
 
 class Taxonomy {
 
     use PostTypeTrait;
+    protected static $_instances = [];
+    protected $_is_registered;
     protected $_slug = '';
     protected $_post_types = [];
     protected $_settings = [];
+    protected $_labels = [];
 
-    public function __construct($handle, $post_type = '', $user_labels = array(), $user_settings = array(), $is_public = true)
+    public function __construct( $handle, $post_type = '', $user_labels = array(), $user_settings = array(), $is_public = true )
     {
-      $this->_slug = kbwp::slugify($handle);
+      $handle = kbwp::slugify( $handle );
 
-      $default_settings = [
-        'labels' => $user_labels
-      ];
+      if ( !$this->instanceExists( $handle ))
+      {
+        $this->_slug = $handle;
+        $this->_is_registered = false;
 
-      $this->_settings = array_merge($default_settings, $user_settings);
-      $post_types = (is_array($post_type) ? $this->addPostTypes($post_type) : $this->addPostType($post_type));
+        $default_settings = [
+        ];
+
+        $this->_settings = array_merge($default_settings, $user_settings);
+
+        if ( is_array( $post_type ))
+        {
+          $this->addPostTypes( $post_type );
+        } else {
+          $this->addPostType( $post_type );
+        }
+
+        self::$_instances[$this->_slug] = $this;
+        return self::$_instances[$this->_slug];
+      }
+      return self::$_instances[$handle];
     }
 
 
@@ -30,22 +47,21 @@ class Taxonomy {
     }
 
 
-    public function debug()
-    {
-      kbwp::log($this);
-    }
-
-
     public function addPostType($post_type = '', bool $return_obj = true)
     {
       $return = false;
-      if (!is_array($post_type)) {
-        if ($post_type instanceof PostType) {
-          $return = $this->hasPostType($post_type->getSlug()) ? false : array_push($this->_post_types, $post_type->getSlug());
-        } else {
-          $return = $this->hasPostType($post_type) ? false : array_push($this->_post_types, $post_type);
+
+      if ( !is_array( $post_type ))
+      {
+        if ($post_type instanceof PostType)
+        {
+          $post_type = $post_type->getSlug();
         }
-        $return = is_array($return) ? true : false;
+        if ( !$this->hasPostType( $post_type ))
+        {
+          array_push($post_type, $this->_post_types)
+          $return = true;
+        }
       }
       $return = ($return_obj ? $this : $return);
       return $return;
@@ -55,6 +71,7 @@ class Taxonomy {
     public function addPostTypes(array $post_types, bool $return_obj = true)
     {
       $return = false;
+
       if (is_array($post_types))
       {
         foreach($post_types as $post_type)
@@ -70,7 +87,13 @@ class Taxonomy {
 
     public function register()
     {
-      add_action('init', [$this, 'init']);
+      if ( !$this->isRegistered() )
+      {
+        $this->is_registered = true;
+        add_action('init', [$this, 'init']);
+        return;
+      }
+      throw new \Exception('Taxonomies can only be registered once!');
     }
 
 

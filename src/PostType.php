@@ -1,189 +1,210 @@
 <?php
-/*
- * @file:           PostType.php
- * @description:    Collection of methods for creating new Post Types
- * @package:        kbwp
- * @author:         kristianb
- * @email:          kristian.broholm@gmail.com
- * @since:          1.0.0
- * */
-
 namespace kbwp;
 
 class PostType
 {
     use PostTypeTrait;
+    protected static $_instances = [];
+    protected $_is_registered;
     protected $_slug;
     protected $_settings;
     protected $_labels;
 
-    /**
-     * Creates new Post Type to be registered.
-     * @param string        $handle        Slug for post type eg. 'post' or 'page'.
-     * @param array         $user_labels   Custom labels for the post type.
-     * @param array         $user_settings Custom settings for the post type
-     * @param boolean       $is_public     Defines should post type be public or not. Private post types are still visible on the admin side by default.
-     */
-    public function __construct($handle = '', $user_labels = array(), $user_settings = array(), $is_public = true )
+    public function __construct($handle = '', $user_labels = [], $user_settings = [], $is_public = true )
     {
-      $this->_slug = kbwp::slugify($handle);
+      $handle = kbwp::slugify( $handle  );
 
-      $default_labels = array(
-          'name' => ucfirst($handle)
-      );
+      if ( !$this->instanceExists( $handle ) )
+      {
+        $this->_slug = $handle;
+        $this->_is_registered = false;
 
-      $this->_labels = array_merge($default_labels, $user_labels);
+        $default_labels = [
+            'name' => ucfirst( $handle )
+        ];
 
-      $default_settings = array(
-          'labels'        => $this->_labels,
-          'supports'      => array(
-              'title'
-          ),
-          'taxonomies'    => array()
-      );
+        $this->_labels = array_merge( $default_labels, $user_labels );
 
-      if ($is_public) {
-          $defaults = array_merge($default_settings, array(
-              'public'    => true
-          ));
-      } else {
-          $defaults = array_merge($default_settings, array(
-              'public'        => false,
-              'show_ui'       => true,
-              'show_in_menu'  => true
-          ));
+        $default_settings = [
+          'public'  => true,
+          'supports' => [
+            'title'
+          ]
+        ];
+
+        if ( !$is_public )
+        {
+          $defaults = array_merge( $default_settings, [
+            'public'        => false,
+            'show_ui'       => true,
+            'show_in_menu'  => true
+          ]);
+        }
+
+        $this->_settings = array_merge( $defaults, $user_settings );
+
+        self::$_instances[$this->_slug] = $this;
+        return self::$_instances[$this->_slug];
+      }
+      return self::$_instances[$handle];
+    }
+
+
+    public function addSupport( $feature = '', bool $return_obj = true )
+    {
+      $return = false;
+      $errors = [];
+
+      if ( !is_array( $feature ) && !is_empty( $feature ))
+      {
+        $feature[] = $feature;
       }
 
-      $this->_settings = array_merge($defaults, $user_settings);
+      foreach( $feature as $feature )
+      {
+        $errors[] = ( $this->hasSupport( $feature ) ? true : false );
+
+        if ( !$this->hasSupport( $feature ))
+        {
+          $this->_settings['supports'][] = $feature;
+        }
+      }
+      $return = $this->hasErrors( $errors );
+      $return = ( $return_obj ? $this : $return );
+      return $return;
     }
 
 
-    public function addSupport($feature = '')
+    public function hasSupport( $feature )
     {
-        if (!is_array($feature)) {
-            $features[] = $feature;
-        } else {
-            $features = $feature;
+      if ( is_array($this->_settings['supports'] ))
+      {
+        if ( in_array( $feature, $this->_settings['supports'] ))
+        {
+          return true;
         }
-
-        foreach($features as $feature) {
-            if (!$this->hasSupport($feature)) {
-                $this->_settings['supports'][] = $feature;
-            }
-        }
+      }
+      return false;
     }
 
 
-    public function getSlug() {
-      return $this->_slug;
-    }
-
-
-    public function hasSupport($feature)
+    public function removeSupport($feature = '', bool $return_obj = true)
     {
-        if (is_array($this->_settings['supports'])) {
-            if (in_array($feature, $this->_settings['supports'])) {
-                return true;
-            }
+      $errors = [];
+
+      if ( !is_array( $feature ))
+      {
+          $feature[] = $feature;
+      }
+
+      foreach( $feature as $feature )
+      {
+        $errors[] = $this->hasSupport( $feature );
+
+        if ( $this->hasSupport( $feature ))
+        {
+          $key = array_search( $feature, $this->_settings['supports'] );
+          unset( $this->_settings['supports'][$key] );
         }
-        return false;
+      }
+      $return = $this->hasErrors( $errors );
+      $return = ( $return_obj ? $this : $return );
+      return $return;
     }
 
 
-
-
-
-
-
-
-    public function debug()
+    public function hasTaxonomy( $taxonomy )
     {
-      kbwp::log($this);
+      if ( array_key_exists( 'taxonomies', $this->_settings ))
+      {
+        if ( in_array( $taxonomy, $this->_settings['taxonomies'] ))
+        {
+          return true;
+        }
+      }
+      return false;
     }
 
 
-    public function removeSupport($feature = '')
+    public function addTaxonomy( $taxonomy = '', bool $return_obj = true )
     {
-        if (!is_array($feature)) {
-            $features[] = $feature;
-        } else {
-            $features = $feature;
-        }
+      $return = false;
 
-        foreach($features as $feature) {
-            if ($this->hasSupport($feature)) {
-                foreach($this->_settings['supports'] as $key => $value) {
-                    if ($value == $feature) {
-                        unset($this->_settings['supports'][$key]);
-                    }
-                }
-            }
+      if ( !is_array( $taxonomy ))
+      {
+        if ( $taxonomy instanceof Taxonomy )
+        {
+          $taxonomy = $taxonomy->getSlug();
         }
+        if ( !$this->hasTaxonomy( $taxonomy ))
+        {
+          $this->_settings['taxonomies'][] = $taxonomy;
+          $return = true;
+        }
+      }
+      $return = ( $return_obj ? $this : $return );
+      return $return;
     }
 
 
-    public function hasTaxonomy($taxonomy)
+    public function addTaxonomies( array $taxonomies, bool $return_obj = true )
     {
-        if (array_key_exists('taxonomies', $this->_settings)) {
-            if (in_array($taxonomy, $this->_settings['taxonomies'])) {
-                return true;
-            }
-        }
-        return false;
+      $return = false;
+      $errors = [];
+
+      foreach ( $taxonomies as $taxonomy )
+      {
+        $errors[] = $this->addTaxonomy( $taxonomy, false );
+      }
+      $return = ( $return_obj ? $this : $this->hasErrors( $errors ) );
+      return $return;
     }
 
 
-    public function addTaxonomy($taxonomy = '')
+    public function removeTaxonomy( $taxonomy = '', bool $return_obj = true )
     {
-        if (is_array($taxonomy)) {
-            $taxonomies = $taxonomy;
-        } else {
-            $taxonomies[] = $taxonomy;
-        }
+      $return = false;
 
-        foreach($taxonomies as $taxonomy) {
-            if (!$this->has_taxonomy($taxonomy)) {
-                $this->_settings['taxonomies'][] = $taxonomy;
-            }
+      if ( !is_array( $taxonomy ))
+      {
+        if ( $taxonomy instanceof Taxonomy )
+        {
+          $taxonomy = $taxonomy->getSlug();
         }
+        if ( $this->hasTaxonomy( $taxonomy ))
+        {
+          $key = array_search( $taxonomy, $this->_settings['taxonomies'] );
+          unset( $this->_settings['taxonomies'][$key] );
+          $return = true;
+        }
+      }
+      $return = ( $return_obj ? $this : $return );
+      return $return;
     }
 
 
-    public function removeTaxonomy($taxonomy = '')
+    public function createTaxonomy( $handle, array $user_labels = [], array $user_settings = [], bool $is_public = true )
     {
-        if (is_array($taxonomy)) {
-            $taxonomies = $taxonomy;
-        } else {
-            $taxonomies[] = $taxonomy;
-        }
-
-        foreach($taxonomies as $taxonomy) {
-            if ($this->hasTaxonomy($taxonomy)) {
-                foreach($this->_settings['taxonomies'] as $key => $value) {
-                    if ($value == $taxonomy) {
-                        unset($this->_settings['taxonomies'][$key]);
-                    }
-                }
-            }
-        }
-    }
-
-
-    public function createTaxonomy($handle, array $user_labels = array(), array $user_settings = array(), bool $is_public = true)
-    {
-        $taxonomy = new Taxonomy($handle, $this->_slug, $user_labels, $user_settings, $is_public);
+        $taxonomy = new Taxonomy( $handle, $this->getSlug(), $user_labels, $user_settings, $is_public );
+        $this->addTaxonomy( $taxonomy );
         return $taxonomy;
     }
 
 
     public function register()
     {
-        add_action('init', array($this, 'init'));
+      if ( !$this->isRegistered() )
+      {
+        $this->_is_registered = true;
+        add_action( 'init', [ $this, 'init' ]);
+        return;
+      }
+      throw new \Exception('PostTypes can only be registered once!');
     }
 
 
     public function init() {
       $this->_settings['labels'] = $this->_labels;
-      register_post_type($this->_slug, $this->_settings);
+      register_post_type( $this->getSlug(), $this->_settings );
     }
 }
