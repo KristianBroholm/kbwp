@@ -103,6 +103,7 @@ abstract class Extension
     kbwp::log(self::$_instance);
   }
 
+
   public function enqueueScripts()
   {
     foreach($this->_styles as $style)

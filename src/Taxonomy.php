@@ -4,91 +4,113 @@ namespace kbwp;
 
 class Taxonomy {
 
-    private $slug;
-    public $hook;
-    private $post_types;
-    private $settings;
+    use PostTypeTrait;
+    protected $_slug = '';
+    protected $_post_types = [];
+    protected $_settings = [];
 
-    public function __construct($handle, $post_type = '', $user_labels = array(), $user_settings = array(), $is_public = true) {
+    public function __construct($handle, $post_type = '', $user_labels = array(), $user_settings = array(), $is_public = true)
+    {
+      $this->_slug = kbwp::slugify($handle);
 
-        $this->slug = kbwp::slugify($handle);
+      $default_settings = [
+        'labels' => $user_labels
+      ];
 
-        $this->hooks = array(
-            'before' => 'before_taxonomy_' . $this->slug . '_is_registered',
-            'after' => 'after_taxonomy_' . $this->slug . '_is_registered'
-        );
-
-        if (is_array($post_type)) {
-            $this->post_types = $post_type;
-        } else {
-            $this->post_types = array();
-            $this->post_types[] = $post_type;
-        }
-
-        $default_settings = array(
-            'labels'    => $user_labels
-        );
-
-        if ($is_public) {
-            $default_settings = array_merge($default_settings, array(
-
-            ));
-        } else {
-            $default_settings = array_merge($default_settings, array(
-
-            ));
-        }
-
-        $this->settings = array_merge($default_settings, $user_settings);
+      $this->_settings = array_merge($default_settings, $user_settings);
+      $post_types = (is_array($post_type) ? $this->addPostTypes($post_type) : $this->addPostType($post_type));
     }
 
-    public function registered_for_post_type($post_type) {
 
-        if (in_array($post_type, $this->post_types)) {
-            return true;
-        }
-        return false;
+    public function hasPostType($post_type)
+    {
+      $post_type  = ($post_type instanceof PostType ? $post_type->getSlug() : $post_type);
+      $return     = (in_array($post_type, $this->_post_types) ? true : false);
+      return $return;
     }
 
-    public function register_for_post_type($post_type = '') {
 
-        if (is_array($post_type)) {
-            $post_types = $post_type;
+    public function debug()
+    {
+      kbwp::log($this);
+    }
+
+
+    public function addPostType($post_type = '', bool $return_obj = true)
+    {
+      $return = false;
+      if (!is_array($post_type)) {
+        if ($post_type instanceof PostType) {
+          $return = $this->hasPostType($post_type->getSlug()) ? false : array_push($this->_post_types, $post_type->getSlug());
         } else {
-            $post_types = array();
-            $post_types[] = $post_type;
+          $return = $this->hasPostType($post_type) ? false : array_push($this->_post_types, $post_type);
         }
-
-        foreach($post_types as $post_type) {
-            if (!$this->registered_for_post_type($post_type)) {
-                $this->post_types[] = $post_type;
-            }
-        }
+        $return = is_array($return) ? true : false;
+      }
+      $return = ($return_obj ? $this : $return);
+      return $return;
     }
 
-    public function remove_from_post_type($post_type) {
 
-        if (is_array($post_type)) {
-            $post_types = $post_type;
-        } else {
-            $post_types = array();
-            $post_types[] = $post_type;
+    public function addPostTypes(array $post_types, bool $return_obj = true)
+    {
+      $return = false;
+      if (is_array($post_types))
+      {
+        foreach($post_types as $post_type)
+        {
+          $this->addPostType($post_type);
         }
-
-        foreach($post_types as $post_type) {
-            if ($this->registered_for_post_type($post_type)) {
-                foreach($this->post_types as $key => $value) {
-                    if ($value == $post_type) {
-                        unset($this->post_types[$key]);
-                    }
-                }
-            }
-        }
+        $return = true;
+      }
+      $return = ($return_obj ? $this : $return);
+      return $return;
     }
 
-    public function __destruct() {
 
-        register_taxonomy($this->slug, $this->post_types, $this->settings);
-        unset($this);
+    public function register()
+    {
+      add_action('init', [$this, 'init']);
+    }
+
+
+    public function init()
+    {
+      register_taxonomy($this->_slug, $this->_post_types, $this->_settings);
+    }
+
+
+    public function removePostType($post_type = '', bool $return_obj = true)
+    {
+      $return = false;
+      if (!is_array($post_type)) {
+        if ($post_type instanceof PostType)
+        {
+          $post_type = $post_type->getSlug();
+        }
+        if ($this->hasPostType($post_type))
+        {
+          unset($this->_post_types[array_search($post_type, $this->_post_types)]);
+          $return = true;
+        }
+      }
+      $return = ($return_obj ? $this : $return);
+      return $return;
+    }
+
+
+    public function removePostTypes(array $post_type, bool $return_obj = true)
+    {
+      $return = false;
+      if (is_array($post_type))
+      {
+        foreach($post_type as $post_type)
+        {
+          $this->removePostType($post_type, false);
+        }
+        $return = true;
+      }
+      $return = ($return_obj ? $this : $return);
+      return $return;
     }
 }

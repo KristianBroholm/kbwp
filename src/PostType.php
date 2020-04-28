@@ -12,6 +12,7 @@ namespace kbwp;
 
 class PostType
 {
+    use PostTypeTrait;
     protected $_slug;
     protected $_settings;
     protected $_labels;
@@ -25,35 +26,35 @@ class PostType
      */
     public function __construct($handle = '', $user_labels = array(), $user_settings = array(), $is_public = true )
     {
-        $this->_slug = kbwp::slugify($handle);
+      $this->_slug = kbwp::slugify($handle);
 
-        $default_labels = array(
-            'name' => ucfirst($handle)
-        );
+      $default_labels = array(
+          'name' => ucfirst($handle)
+      );
 
-        $this->_labels = array_merge($default_labels, $user_labels);
+      $this->_labels = array_merge($default_labels, $user_labels);
 
-        $default_settings = array(
-            'labels'        => $this->_labels,
-            'supports'      => array(
-                'title'
-            ),
-            'taxonomies'    => array()
-        );
+      $default_settings = array(
+          'labels'        => $this->_labels,
+          'supports'      => array(
+              'title'
+          ),
+          'taxonomies'    => array()
+      );
 
-        if ($is_public) {
-            $defaults = array_merge($default_settings, array(
-                'public'    => true
-            ));
-        } else {
-            $defaults = array_merge($default_settings, array(
-                'public'        => false,
-                'show_ui'       => true,
-                'show_in_menu'  => true
-            ));
-        }
+      if ($is_public) {
+          $defaults = array_merge($default_settings, array(
+              'public'    => true
+          ));
+      } else {
+          $defaults = array_merge($default_settings, array(
+              'public'        => false,
+              'show_ui'       => true,
+              'show_in_menu'  => true
+          ));
+      }
 
-        $this->_settings = array_merge($defaults, $user_settings);
+      $this->_settings = array_merge($defaults, $user_settings);
     }
 
 
@@ -73,6 +74,11 @@ class PostType
     }
 
 
+    public function getSlug() {
+      return $this->_slug;
+    }
+
+
     public function hasSupport($feature)
     {
         if (is_array($this->_settings['supports'])) {
@@ -81,6 +87,18 @@ class PostType
             }
         }
         return false;
+    }
+
+
+
+
+
+
+
+
+    public function debug()
+    {
+      kbwp::log($this);
     }
 
 
@@ -151,16 +169,10 @@ class PostType
     }
 
 
-    public function createTaxonomy($handle, $user_labels = array(), $user_settings = array(), $is_public = true)
+    public function createTaxonomy($handle, array $user_labels = array(), array $user_settings = array(), bool $is_public = true)
     {
         $taxonomy = new Taxonomy($handle, $this->_slug, $user_labels, $user_settings, $is_public);
         return $taxonomy;
-    }
-
-
-    public function getSettings()
-    {
-        return $this->_settings;
     }
 
 
@@ -171,6 +183,7 @@ class PostType
 
 
     public function init() {
+      $this->_settings['labels'] = $this->_labels;
       register_post_type($this->_slug, $this->_settings);
     }
 }
