@@ -20,7 +20,7 @@ abstract class kbwp {
     }
 
 
-    public static function log($variable)
+    public static function log( $variable )
     {
       echo '<pre>';
       print_r($variable);
@@ -38,9 +38,10 @@ abstract class kbwp {
     {
         $assets = array();
 
-        if ( file_exists($manifest_path) ) {
-            $manifest   = file_get_contents($manifest_path, true);
-            $assets     = json_decode($manifest, true);
+        if ( file_exists( $manifest_path ) )
+        {
+            $manifest   = file_get_contents( $manifest_path, true );
+            $assets     = json_decode( $manifest, true );
         }
         return $assets;
     }
@@ -50,9 +51,10 @@ abstract class kbwp {
      * @author: kristianb
      * @since:  0.0.0
      * */
-    public static function get_asset($asset, $manifest = array())
+    public static function get_asset( $asset, array $manifest = [] )
     {
-        if ( array_key_exists( $asset, $manifest ) ) {
+        if ( array_key_exists( $asset, $manifest ) )
+        {
             return $manifest[ $asset ];
         }
         return $asset;
