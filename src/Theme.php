@@ -5,11 +5,12 @@ use Timber\Timber as Timber, \TimberMenu;
 
 class Theme extends Extension
 {
-    private $_menus = [];
-    public $_url;
-    public $_directory;
-    public $_locale;
-    public $_languageFolder;
+    protected $_directory;
+    protected $_features = [];
+    protected $_locale;
+    protected $_languageFolder;
+    protected $_menus = [];
+    protected $_url;
 
     protected function __construct()
     {
@@ -43,19 +44,60 @@ class Theme extends Extension
     }
 
 
-    /*
-    public function addNavigationsToTimberContext()
+    public function addSupport( $feature = '', array $args = [], bool $return_obj = true )
     {
-        add_filter('timber_context', array( $this, 'filter_add_navigations_to_timber_context' ));
+        $return = false;
+        $errors = [];
+
+        $addSupport = function( $feature = '', array $args = [] )
+        {
+            if ( !$this->hasSupport( $feature ) )
+            {
+                $this->_features[$feature]['feature'] = $feature;
+                if ( !empty($args) )
+                {
+                    $this->_features[$feature]['args'] = $args;
+                }
+                return true;
+            }
+            return false;
+        };
+
+        if ( !is_array( $feature ))
+        {
+            $return = $addSupport( $feature, $args );
+        }
+        else
+        {
+            foreach( $feature as $feature )
+            {
+                $errors[] = $addSupport( $feature );
+            }
+            $return = ( !$this->hasErrors( $errors ) ? true : false );
+        }
+        $return = ( $return_obj ? $this : $return );
+        return $return;
     }
-    */
+
+
+    public function hasSupport( $feature = '' )
+    {
+        $return = false;
+
+        if ( !is_array( $feature ))
+        {
+            $return = array_key_exists( $feature, $this->_features );
+        }
+        return $return;
+    }
 
 
     public static function load()
     {
         $class = get_called_class();
-        $theme = new $class();
+        $theme = $class::init();
         $theme->loadNavigationMenus();
+        $theme->loadSupportedFeatures();
         parent::load();
     }
 
@@ -63,8 +105,24 @@ class Theme extends Extension
     private function loadNavigationMenus()
     {
         $class = get_called_class();
-        $theme = new $class();
-        add_action('after_setup_theme', array( $theme, 'registerNavigationMenus' ));
+        $theme = $class::init();
+        $theme->addAction('after_setup_theme', [$theme, 'registerNavigationMenus']);
+    }
+
+
+    private function loadSupportedFeatures()
+    {
+        foreach( $this->_features as $feature )
+        {
+            if ( array_key_exists( 'arg', $feature ))
+            {
+                add_theme_support( $feature['feature'], $feature['args']);
+            } 
+            else
+            {
+                add_theme_support( $feature['feature']);
+            }
+        }
     }
 
 
@@ -77,5 +135,11 @@ class Theme extends Extension
                 register_nav_menu( $handle, $name );
             }
         }
+    }
+
+
+    public function url()
+    {
+        return $this->_url;
     }
 }

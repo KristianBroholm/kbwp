@@ -61,6 +61,10 @@ abstract class Extension
 
     public function addFilter($hook, $action, int $priority = 10, int $accepted_args = 1, bool $return_obj = true)
     {
+        if (!is_array($action) && is_callable($action))
+        {
+            return $this->addAnonymous('filter', $hook, $action, $priority, $accepted_args, $return_obj);
+        }
         $return               = false;
         $key                  = $this->generateKey($hook, $action);
         $properties           = [$hook, $action, $priority, $accepted_args];
@@ -71,6 +75,29 @@ abstract class Extension
             $return = true;
         }
         $return = ($return_obj ? $this : $return);
+        return $return;
+    }
+
+
+    public function addGoogleAnalytics($id = '', array $environments = [], bool $disableIfAdmin = true,  bool $return_obj = true)
+    {
+        if ( in_array( $_ENV['WP_ENV'], $environments ) )
+        {
+            if ( ( $disableIfAdmin && !is_user_logged_in() ) || !$disableIfAdmin )
+            {
+                $this->addAction('wp_head', function() use ($id) {
+                    echo '<!-- // Google Analytics -->';
+                    echo '<script async src="https://www.googletagmanager.com/gtag/js?id=' . $id . '"></script>';
+                    echo '<script>';
+                    echo 'window.dataLayer = window.dataLayer || [];';
+                    echo 'function gtag(){dataLayer.push(arguments);}';
+                    echo 'gtag(\'js\', new Date());';
+                    echo 'gtag(\'config\', \'' . $id . '\');';
+                    echo '</script>';
+                }, 2);
+            }
+        }
+        $return = ($return_obj ? $this : true);
         return $return;
     }
 
@@ -112,7 +139,7 @@ abstract class Extension
         }
         foreach($this->_scripts as $script)
         {
-            wp_enqueue_style($script['handle'], $script['src'], $script['deps'], $script['ver'], $script['in_footer']);
+            wp_enqueue_script($script['handle'], $script['src'], $script['deps'], $script['ver'], $script['in_footer']);
         }
     }
 
