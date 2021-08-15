@@ -56,12 +56,12 @@ class PostType
         $return = false;
         $errors = [];
 
-        if ( !is_array( $feature ) && !is_empty( $feature ))
+        if ( !is_array( $feature ) && !empty( $feature ))
         {
-            $feature[] = $feature;
+            $features[] = $feature;
         }
 
-        foreach( $feature as $feature )
+        foreach( $features as $feature )
         {
             $errors[] = ( $this->hasSupport( $feature ) ? true : false );
 
