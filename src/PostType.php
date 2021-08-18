@@ -51,10 +51,11 @@ class PostType
     }
 
 
-    public function addSupport( $feature = '', bool $return_obj = true )
+    public function addSupport( $feature, bool $return_obj = true )
     {
         $return = false;
         $errors = [];
+        $features = [];
 
         if ( !is_array( $feature ) && !empty( $feature ))
         {
