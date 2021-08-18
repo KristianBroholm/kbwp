@@ -3,100 +3,41 @@ namespace kbwp;
 
 class Taxonomy {
 
-    use PostTypeTrait;
+    use Traits\HasHandle;
+    use Traits\HasName;
+    use Traits\HasLabels;
+    use Traits\HasPostTypes;
+    use Traits\HasSettings;
+    use Traits\MustBeRegistered;
 
-    protected static $_instances = [];
-    protected $_is_registered;
-    protected $_slug = '';
-    protected $_post_types = [];
-    protected $_settings = [];
-    protected $_labels = [];
-
-    public function __construct( $handle, $post_type, $user_labels = array(), $user_settings = array(), $is_public = true )
+    public function __construct( $name, $post_type, $user_labels = array(), $user_settings = array(), $is_public = true )
     {
-        $handle = sanitize_key( $handle );
 
-        if ( !$this->instanceExists( $handle ))
-        {
-            $this->_slug = $handle;
-            $this->_is_registered = false;
+        $this->setName( $name );
+        $this->setHandle( $name );
+        $this->addLabels( $user_labels );
 
-            $default_settings = [
-                'labels'        => $user_labels,
-                'show_in_rest'  => true
-            ];
+        $default_settings = [
+            'labels'        => $this->_labels,
+            'show_in_rest'  => true
+        ];
 
-            if ( !$is_public ) {
-                $default_settings = array_merge(
-                    $default_settings,
-                    [
-                        'show_in_ui'            => true,
-                        'show_in_nav_menus'     => false,
-                        'publicly_queryable'    => true
-                    ]
-                );
-            }
-
-            $this->_settings = array_merge( $default_settings, $user_settings );
-
-            if ( is_array( $post_type ))
-            {
-                $this->addPostTypes( $post_type );
-            }
-            else
-            {
-                $this->addPostType( $post_type );
-            }
-            self::$_instances[$this->_slug] = $this;
-            return self::$_instances[$this->_slug];
+        if ( !$is_public ) {
+            $default_settings = array_merge(
+                $default_settings,
+                [
+                    'show_in_ui'            => true,
+                    'show_in_nav_menus'     => false,
+                    'publicly_queryable'    => true
+                ]
+            );
         }
-        return self::$_instances[$handle];
-    }
 
-
-    public function hasPostType($post_type)
-    {
-        $post_type  = ( $post_type instanceof PostType ? $post_type->getSlug() : $post_type );
-        $return     = ( in_array( $post_type, $this->_post_types ) ? true : false );
-        return $return;
-    }
-
-
-    public function addPostType($post_type = '', bool $return_obj = true)
-    {
-        $return = false;
-
-        if ( !is_array( $post_type ))
-        {
-            if ( $post_type instanceof PostType )
-            {
-                $post_type = $post_type->getSlug();
-            }
-            if ( !$this->hasPostType( $post_type ))
-            {
-                array_push( $this->_post_types, $post_type );
-                $return = true;
-            }
-        }
-        $return = ( $return_obj ? $this : $return );
-        return $return;
-    }
-
-
-    public function addPostTypes( array $post_types, bool $return_obj = true )
-    {
-        $return = false;
-
-        if ( is_array( $post_types ))
-        {
-            foreach( $post_types as $post_type )
-            {
-                $this->addPostType( $post_type );
-            }
-            $return = true;
-        }
-        $return = ( $return_obj ? $this : $return );
-        return $return;
+        $this->addSettings( $default_settings );
+        $this->addSettings( $user_settings );
+        $this->addPostType( $post_type );
+            
+        return $this;
     }
 
 
@@ -104,7 +45,7 @@ class Taxonomy {
     {
         if ( !$this->isRegistered() )
         {
-            $this->is_registered = true;
+            $this->setRegistrationState( true );
             add_action( 'init', [$this, 'init'] );
             return;
         }
@@ -114,44 +55,6 @@ class Taxonomy {
 
     public function init()
     {
-        register_taxonomy( $this->_slug, $this->_post_types, $this->_settings );
-    }
-
-
-    public function removePostType( $post_type = '', bool $return_obj = true )
-    {
-        $return = false;
-
-        if ( !is_array( $post_type ) )
-        {
-            if ( $post_type instanceof PostType )
-            {
-                $post_type = $post_type->getSlug();
-            }
-            if ( $this->hasPostType( $post_type ))
-            {
-                unset( $this->_post_types[array_search( $post_type, $this->_post_types )] );
-                $return = true;
-            }
-        }
-        $return = ( $return_obj ? $this : $return );
-        return $return;
-    }
-
-
-    public function removePostTypes( array $post_type, bool $return_obj = true )
-    {
-        $return = false;
-
-        if ( is_array( $post_type ))
-        {
-            foreach( $post_type as $post_type )
-            {
-                $this->removePostType( $post_type, false );
-            }
-            $return = true;
-        }
-        $return = ( $return_obj ? $this : $return );
-        return $return;
+        register_taxonomy( $this->getHandle(), $this->getPostTypes(), $this->getSettings() );
     }
 }

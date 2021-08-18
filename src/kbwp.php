@@ -28,6 +28,14 @@ abstract class kbwp {
     }
 
 
+    public static function dump( $variable)
+    {
+        echo '<pre>';
+        var_dump($variable);
+        die(); 
+    }
+
+
     /* Read assets from manifest JSON created by rev-module
      * @author  kristianb
      * @since   1.0.0

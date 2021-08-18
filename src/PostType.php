@@ -3,58 +3,50 @@ namespace kbwp;
 
 class PostType
 {
-    use PostTypeTrait;
-    protected static $_instances = [];
-    protected $_is_registered;
-    protected $_slug;
-    protected $_settings;
-    protected $_labels;
+    use Traits\HasSettings;
+    use Traits\HasLabels;
+    use Traits\HasName;
+    use Traits\HasHandle;
+    use Traits\MustBeRegistered;
 
-    public function __construct($handle = '', array $user_labels = [], $user_settings = [], $is_public = true)
+    public function __construct( string $name , array $user_labels = [], $user_settings = [], $is_public = true)
     {
-        $handle = sanitize_key($handle);
+        $this->setName($name);
+        $this->setHandle($this->_name);
 
-        if ( !$this->instanceExists( $handle ) )
+        $default_labels = [
+            'name' => $this->getName()
+        ];
+
+        $this->addLabels( $default_labels );
+        $this->addLabels( $user_labels );
+
+        $default_settings = [
+            'public'  => true,
+            'supports' => [
+            'title'
+            ]
+        ];
+
+        if ( !$is_public )
         {
-            $this->_slug = $handle;
-            $this->_is_registered = false;
-
-            $default_labels = [
-                'name' => ucfirst($this->_slug),
-            ];
-
-            $this->_labels = array_merge( $default_labels, $user_labels );
-
-            $default_settings = [
-                'public'  => true,
-                'supports' => [
-                'title'
-                ]
-
-            ];
-
-            if ( !$is_public )
-            {
-                $default_settings = array_merge( $default_settings, [
-                    'public'        => false,
-                    'show_ui'       => true,
-                    'show_in_menu'  => true
-                ]);
-            }
-
-            $this->_settings = array_merge( $default_settings, $user_settings );
-
-            self::$_instances[$this->_slug] = $this;
-            return self::$_instances[$this->_slug];
+            $default_settings = array_merge( $default_settings, [
+                'public'        => false,
+                'show_ui'       => true,
+                'show_in_menu'  => true
+            ]);
         }
-        return self::$_instances[$handle];
+
+        $this->addSettings($default_settings);
+        $this->addSettings($user_settings);
+        
+        return $this;
     }
 
 
     public function addSupport( $feature, bool $return_obj = true )
     {
         $return = false;
-        $errors = [];
         $features = [];
 
         if ( !is_array( $feature ) && !empty( $feature ))
@@ -71,7 +63,6 @@ class PostType
                 $this->_settings['supports'][] = $feature;
             }
         }
-        $return = $this->hasErrors( $errors );
         $return = ( $return_obj ? $this : $return );
         return $return;
     }
@@ -181,7 +172,7 @@ class PostType
             {
             if ( $taxonomy instanceof Taxonomy )
             {
-                $taxonomy = $taxonomy->getSlug();
+                $taxonomy = $taxonomy->getHandle();
             }
 
             if ( $this->hasTaxonomy( $taxonomy ))
@@ -196,19 +187,11 @@ class PostType
     }
 
 
-    public function createTaxonomy( $handle, array $user_labels = [], array $user_settings = [], bool $is_public = true )
-    {
-        $taxonomy = new Taxonomy( $handle, $this->getSlug(), $user_labels, $user_settings, $is_public );
-        $this->addTaxonomy( $taxonomy );
-        return $taxonomy;
-    }
-
-
     public function register()
     {
         if ( !$this->isRegistered() )
         {
-            $this->_is_registered = true;
+            $this->setRegistrationState( true );
             add_action('init', [$this, 'init']);
             return;
         }
@@ -218,7 +201,7 @@ class PostType
 
     public function init()
     {
-        $this->_settings['labels'] = $this->_labels;
-        register_post_type( $this->getSlug(), $this->_settings );
+        $this->addSetting( 'labels', $this->getLabels() );
+        register_post_type( $this->getHandle(), $this->getSettings() );
     }
 }
