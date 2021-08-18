@@ -156,7 +156,7 @@ class PostType
     /**
      * Adds multiple existing Taxonomies for Post Type
      * @param array   $taxonomies Array of taxonomy names or objects to be added
-     * @param boolean $return_obj Returns $this if set to true. Defaults to true.
+     * @param boolean $return_obj Returns $this if set to true. Defaultcs to true.
      */
     public function addTaxonomies( array $taxonomies, bool $return_obj = true )
     {
