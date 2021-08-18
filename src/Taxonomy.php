@@ -12,7 +12,7 @@ class Taxonomy {
     protected $_settings = [];
     protected $_labels = [];
 
-    public function __construct( $handle, $post_type = '', $user_labels = array(), $user_settings = array(), $is_public = true )
+    public function __construct( $handle, $post_type, $user_labels = array(), $user_settings = array(), $is_public = true )
     {
         $handle = sanitize_key( $handle );
 
@@ -22,7 +22,20 @@ class Taxonomy {
             $this->_is_registered = false;
 
             $default_settings = [
+                'labels'        => $user_labels,
+                'show_in_rest'  => true
             ];
+
+            if ( !$is_public ) {
+                $default_settings = array_merge(
+                    $default_settings,
+                    [
+                        'show_in_ui'            => true,
+                        'show_in_nav_menus'     => false,
+                        'publicly_queryable'    => true
+                    ]
+                );
+            }
 
             $this->_settings = array_merge( $default_settings, $user_settings );
 
@@ -61,7 +74,7 @@ class Taxonomy {
             }
             if ( !$this->hasPostType( $post_type ))
             {
-                array_push( $post_type, $this->_post_types )
+                array_push( $this->_post_types, $post_type );
                 $return = true;
             }
         }
