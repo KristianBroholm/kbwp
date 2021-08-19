@@ -28,7 +28,7 @@ abstract class kbwp {
     }
 
 
-    public static function dump( $variable)
+    public static function dump( $variable )
     {
         echo '<pre>';
         var_dump($variable);
