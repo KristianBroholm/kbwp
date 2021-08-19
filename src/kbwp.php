@@ -20,7 +20,7 @@ abstract class kbwp {
     }
 
 
-    public static function log( $variable )
+    public static function log($variable)
     {
       echo '<pre>';
       print_r($variable);
@@ -28,7 +28,7 @@ abstract class kbwp {
     }
 
 
-    public static function dump( $variable )
+    public static function dump($variable)
     {
         echo '<pre>';
         var_dump($variable);
@@ -42,14 +42,14 @@ abstract class kbwp {
      * @param   $manifest_path  string  Absolute path to manifest.json
      * @return  $assets         array   Returns assets as key-value pairs
      * */
-    public static function get_assets_from_manifest( $manifest_path = '' )
+    public static function get_assets_from_manifest($manifest_path = '')
     {
         $assets = array();
 
-        if ( file_exists( $manifest_path ) )
+        if (file_exists($manifest_path))
         {
-            $manifest   = file_get_contents( $manifest_path, true );
-            $assets     = json_decode( $manifest, true );
+            $manifest   = file_get_contents($manifest_path, true);
+            $assets     = json_decode($manifest, true);
         }
         return $assets;
     }
@@ -59,12 +59,40 @@ abstract class kbwp {
      * @author: kristianb
      * @since:  0.0.0
      * */
-    public static function get_asset( $asset, array $manifest = [] )
+    public static function get_asset($asset, array $manifest = [])
     {
-        if ( array_key_exists( $asset, $manifest ) )
-        {
-            return $manifest[ $asset ];
+        if ( array_key_exists($asset, $manifest )) {
+            return $manifest[$asset];
         }
         return $asset;
+    }
+
+
+    public static function rglob(string $dir, string $pattern): array
+    {   
+        $results = [];
+        $directories = glob($dir . '/*');
+        $files = glob($dir . $pattern);
+
+        $results = array_merge($results, $files);
+
+        if (is_array($directories)) 
+        {
+            foreach($directories as $directory) {
+                if (is_dir($directory)) {
+                    $files = self::rglob($directory, $pattern);
+                    $results = array_merge($results, $files);
+                } 
+            }
+        } 
+        return $results;
+    }
+
+    public static function requireFiles(string $dir, string $pattern)
+    {
+        $files = self::rglob($dir, $pattern);
+        foreach($files as $file) {
+            require_once $file;
+        }
     }
 }

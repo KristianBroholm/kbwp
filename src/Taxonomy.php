@@ -32,7 +32,7 @@ class Taxonomy {
                 ]
             );
         }
-
+        
         $this->addSettings( $default_settings );
         $this->addSettings( $user_settings );
         $this->addPostType( $post_type );

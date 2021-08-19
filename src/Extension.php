@@ -1,5 +1,4 @@
 <?php
-
 namespace kbwp;
 
 // Base class for Themes and Plugins
