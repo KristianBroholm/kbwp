@@ -9,7 +9,12 @@ class PostType
     use Traits\HasHandle;
     use Traits\MustBeRegistered;
 
-    public function __construct( string $name , array $user_labels = [], $user_settings = [], $is_public = true)
+    public function __construct( 
+        string  $name, 
+        array   $user_labels    = [], 
+        array   $user_settings  = [], 
+        bool    $is_public      = true
+        )
     {
         $this->setName($name);
         $this->setHandle($this->_name);
@@ -18,8 +23,8 @@ class PostType
             'name' => $this->getName()
         ];
 
-        $this->addLabels( $default_labels );
-        $this->addLabels( $user_labels );
+        $this->setLabels( $default_labels );
+        $this->setLabels( $user_labels, true );
 
         $default_settings = [
             'public'  => true,
@@ -191,17 +196,17 @@ class PostType
     {
         if ( !$this->isRegistered() )
         {
-            $this->setRegistrationState( true );
-            add_action('init', [$this, 'init']);
+            $this->setRegistrationState(true);
+            add_action('init', [$this, 'registration_callback']);
             return;
         }
         throw new \Exception('PostTypes can only be registered once!');
     }
 
 
-    public function init()
+    public function registration_callback()
     {
-        $this->addSetting( 'labels', $this->getLabels() );
-        register_post_type( $this->getHandle(), $this->getSettings() );
+        $this->addSetting('labels', $this->getLabels());
+        register_post_type($this->getHandle(), $this->getSettings());
     }
 }

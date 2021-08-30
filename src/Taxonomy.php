@@ -13,9 +13,9 @@ class Taxonomy {
     public function __construct( $name, $post_type, $user_labels = array(), $user_settings = array(), $is_public = true )
     {
 
-        $this->setName( $name );
-        $this->setHandle( $name );
-        $this->addLabels( $user_labels );
+        $this->setName($name);
+        $this->setHandle($name);
+        $this->setLabels($user_labels, true);
 
         $default_settings = [
             'labels'        => $this->_labels,

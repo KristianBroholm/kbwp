@@ -6,63 +6,76 @@ Trait HasLabels {
 
     protected $_labels = [];
 
-    public function addLabel( string $key, string $label )
-    {
-        $this->_labels[$key]  = $label;
-        return $this;
-    }
-
-
-    public function addLabels( array $labels )
-    {
-        foreach( $labels as $key => $label )
-        {
-            $this->addLabel( $key, $label, false );
+    public function setLabel(string $key, string $label, bool $override = false, bool $return_obj = true)
+    {   
+        $state = false;
+        if ($this->hasLabel($key) && false == $override) {
+            $state = false;
+        } else {
+            $this->_labels[$key] = $label;
+            $state = true;
         }
+        $return = ($return_obj ? $this : $state);
+        return $return;
+    }
+
+    public function setLabels(array $labels, bool $override = false, bool $return_obj = true)
+    {
+        $state = true;
+
+        foreach($labels as $key => $label)
+        {
+            $success = $this->setLabel($key, $label, $override, false);
+            if (!$success) {
+                $state = false;
+            }
+        }
+        $return = ($return_obj ? $this : $state);
         return $this;
     }
 
-
-    public function getLabel( string $key )
+    public function getLabel(string $key)
     {
         $return = false;
 
-        if ( array_key_exists( $key, $this->_labels )) {
+        if ($this->hasLabel($key)) 
+        {
             $return = $this->_labels[$key];
         }
         return $return;
     }
 
 
-    public function getLabels() {
+    public function getLabels() 
+    {
         return $this->_labels;
     }
 
 
-    public function hasLabel( $label = '' )
+    public function hasLabel($label = '')
     {
-        $return = array_key_exists( $label, $this->_labels );
+        $return = array_key_exists($label, $this->_labels);
         return $return;
     }
 
     
-    public function removeLabel( $key ) 
+    public function removeLabel($key) 
     {
         if ( !is_array ) {
-            if ( array_key_exists( $key, $this->_labels )) {
-                unset( $this->_labels[$key] );
+            if ($this->hasLabel($key)) {
+                unset($this->_labels[$key]);
             }
         } else {
-            $this->removeLabels( $key );
+            $this->removeLabels($key);
         }
         return $this;
     }
 
 
-    protected function removeLabels( array $key )
+    protected function removeLabels(array $key)
     {
         foreach ($key as $key) {
-            $this->removeLabel( $key );
+            $this->removeLabel($key);
         }
     }
 }

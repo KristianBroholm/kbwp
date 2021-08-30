@@ -1,7 +1,6 @@
 <?php
 
 namespace kbwp;
-use Timber\Timber as Timber, \TimberMenu;
 
 class Theme extends Extension
 {
@@ -16,7 +15,6 @@ class Theme extends Extension
     {
         $this->_url             = get_stylesheet_directory_uri();
         $this->_directory       = get_template_directory();
-        $this->_languageFolder  = '';
     }
 
 
@@ -44,11 +42,8 @@ class Theme extends Extension
     }
 
 
-    public function addSupport( $feature = '', array $args = [], bool $return_obj = true )
+    public function addSupport($feature = '', array $args = []): obj
     {
-        $return = false;
-        $errors = [];
-
         $addSupport = function( $feature = '', array $args = [] )
         {
             if ( !$this->hasSupport( $feature ) )
@@ -80,15 +75,9 @@ class Theme extends Extension
     }
 
 
-    public function hasSupport( $feature = '' )
+    public function hasSupport(string $feature = '')
     {
-        $return = false;
-
-        if ( !is_array( $feature ))
-        {
-            $return = array_key_exists( $feature, $this->_features );
-        }
-        return $return;
+        return array_key_exists($feature, $this->_features);
     }
 
 
@@ -112,27 +101,27 @@ class Theme extends Extension
 
     private function loadSupportedFeatures()
     {
-        foreach( $this->_features as $feature )
+        foreach($this->_features as $feature)
         {
-            if ( array_key_exists( 'arg', $feature ))
+            if (array_key_exists('arg', $feature))
             {
-                add_theme_support( $feature['feature'], $feature['args']);
+                add_theme_support($feature['feature'], $feature['args']);
             } 
             else
             {
-                add_theme_support( $feature['feature']);
+                add_theme_support($feature['feature']);
             }
         }
     }
 
 
-    public function registerNavigationMenus()
+    private function registerNavigationMenus()
     {
-        foreach( $this->_menus as $menu )
+        foreach($this->_menus as $menu)
         {
-            foreach( $menu as $handle => $name )
+            foreach($menu as $handle => $name)
             {
-                register_nav_menu( $handle, $name );
+                register_nav_menu($handle, $name);
             }
         }
     }
