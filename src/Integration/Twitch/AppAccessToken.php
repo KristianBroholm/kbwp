@@ -1,5 +1,6 @@
 <?php
 namespace kbwp\Integration\Twitch;
+use kbwp\kbwp as kbwp;
 
 class AppAccessToken 
 {
@@ -14,20 +15,13 @@ class AppAccessToken
         $this->_clientID        = $clientID;
         $this->_clientSecret    = $clientSecret;
         $this->_optionKey       = get_called_class() . '_' . $clientID;
-        delete_option($this->_optionKey);
-
-        if ($this->exists() && $this->isValid()) {
-            $this->getTokenFromDatabase();
-        } else {
-            $this->requestAccessToken();
-        }
+        $this->_accessToken     = $this->setAccessToken();
     }
 
 
     private function exists() : bool
     {
         $token = get_option($this->_optionKey);
-
         if ($token) {
             return true;
         }
@@ -35,26 +29,23 @@ class AppAccessToken
     }
 
 
-    private function getTokenFromDatabase()
+    private function setAccessToken()
     {   
-        $token = get_option($this->_optionKey);
-        $return = json_decode($token);
-        $this->_accessToken = $return;
+        if ($this->exists()) {
+            $token = $this->getTokenFromDatabase();
+            if ($token['timestamp'] + $token['expires_in'] > time()) {
+                return $token;
+            }
+        }
+        return $this->requestAccessToken();
     }
 
 
-    private function isValid()
-    {
-        if ($this->exists()) 
-        {
-            $timestamp  = $this->_accessToken['timestamp'];
-            $expires    = $this->_accessToken['expires_in'];
-
-            if ($timestamp + $expires < time()) {
-                return true;
-            }
-        }
-        return false;
+    private function getTokenFromDatabase()
+    {   
+        $token = get_option($this->_optionKey);
+        $return = json_decode($token, true);
+        return $return;
     }
 
 
