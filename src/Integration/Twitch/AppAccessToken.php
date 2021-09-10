@@ -4,30 +4,30 @@ use kbwp\kbwp as kbwp;
 
 class AppAccessToken 
 {
-    private $_clientID;
-    private $_clientSecret;
-    private $_optionKey;
-    private $_accessToken;
+    private $clientID;
+    private $clientSecret;
+    private $optionKey;
+    private $accessToken;
     
 
-    public function __construct(string $clientID, string $clientSecret)
+    public function __construct(string $clientID, string $clientSecret, bool $debug = false)
     {
-        $this->_clientID        = $clientID;
-        $this->_clientSecret    = $clientSecret;
-        $this->_optionKey       = get_called_class() . '_' . $clientID;
-        $this->_accessToken     = $this->setAccessToken();
-    }
-
+        $this->clientID        = $clientID;
+        $this->clientSecret    = $clientSecret;
+        $this->optionKey       = get_called_class() . '_' . $clientID;
+        $this->debug           = $debug;
+        $this->authUri         = 'https://id.twitch.tv/oauth2/token';
+        $this->accessToken     = $this->setAccessToken();
+    }   
 
     private function exists() : bool
     {
-        $token = get_option($this->_optionKey);
+        $token = get_option($this->optionKey);
         if ($token) {
             return true;
         }
         return false;
     }
-
 
     private function setAccessToken()
     {   
@@ -40,57 +40,55 @@ class AppAccessToken
         return $this->requestAccessToken();
     }
 
-
     private function getTokenFromDatabase()
     {   
-        $token = get_option($this->_optionKey);
+        $token = get_option($this->optionKey);
         $return = json_decode($token, true);
         return $return;
     }
 
-
     private function requestAccessToken() 
     {
-        $url = 'https://id.twitch.tv/oauth2/token';
-        $post = [
-            'client_id'     => $this->_clientID,
-            'client_secret' => $this->_clientSecret,
-            'grant_type'    => 'client_credentials'
-        ];
-        
-        $request = curl_init($url);
-        curl_setopt($request, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($request, CURLOPT_POSTFIELDS, $post);
-        $response = curl_exec($request);
-        curl_close($request);
-        return $this->storeTokenToDatabase($response);
-    }
+        $response = wp_remote_post(
+            $this->authUri,
+            [
+                'body' => [
+                    'client_id'     => $this->clientID,
+                    'client_secret' => $this->clientSecret,
+                    'grant_type'    => 'client_credentials'
 
+                ]
+            ]
+        );
+
+        if (200 === $response['response']['code']) {
+            $this->storeTokenToDatabase($response['body']);
+        }
+        
+    }
 
     private function storeTokenToDatabase($data) 
     {
         $object = json_decode($data);
         $object->{'timestamp'} = time();
-        
         $json = json_encode($object);
-
+  
         if ($this->exists()) {
-            update_option($this->_optionKey, $json);
+            update_option($this->optionKey, $json);
         } else {
-            add_option($this->_optionKey, $json);
+            add_option($this->optionKey, $json);
         }
         return $this->getTokenFromDatabase();
     }
-
 
     public function get(string $property = 'token'): string 
     {
         switch($property) {
             case 'token':
-                return $this->_accessToken->{'access_token'};
+                return $this->accessToken['access_token'];
                 break;
             case 'type':
-                return $this->_accessToken->{'token_type'};
+                return $this->accessToken['token_type'];
                 break;
         }
     }

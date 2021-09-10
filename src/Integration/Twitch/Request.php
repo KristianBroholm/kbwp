@@ -26,7 +26,7 @@ class Request
         $this->jsonDecode = $jsonDecode;
     }
 
-    public function respond()
+    public function response()
     {
         $request = curl_init();
         curl_setopt($request, CURLOPT_URL, $this->apiUri . $this->query);

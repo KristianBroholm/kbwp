@@ -3,10 +3,10 @@ namespace kbwp\Integration;
 
 class Twitch 
 {
-    private static $instances = [];
-    private $clientID;
-    private $clientSecret;
-    private $accessToken;
+    protected static $instances = [];
+    protected $clientID;
+    protected $clientSecret;
+    protected $accessToken;
 
     private function __construct(string $clientID, string $clientSecret)
     {
@@ -28,6 +28,6 @@ class Twitch
     public function get(string $query, bool $jsonDecode = true)
     {
         $request = new Twitch\Request($query, $this->clientID, $this->accessToken, $jsonDecode);
-        return $request->respond();
+        return $request->response();
     }
 }
