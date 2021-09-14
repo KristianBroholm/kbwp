@@ -21,14 +21,25 @@ class ChallengerMode
         self::$instances[$this->handle]    = $this;
     }
 
+
+    public function __toString()
+    {
+        $class = get_called_class();
+        return $class;
+    }
+
+
     public static function init(string $handle, string $refreshKey, bool $debug = false)
     {
-        if (array_key_exists($handle, self::$instances)) 
+        $class = get_called_class();
+
+        if (!isset(self::$instances[$class]))
         {
-            return self::$instances[$handle];
+            self::$instances[$class] = new $class($handle, $refreshKey, $debug);
         }
-        return new self($handle, $refreshKey, $debug);
+        return self::$instances[$class];
     }
+
 
     public function get(string $query, bool $jsonDecode = true, int $cacheForSeconds = 0)
     {
@@ -52,6 +63,7 @@ class ChallengerMode
         return $request->response;
     }
 
+
     public function prefix(string $string = '', string $separator = '_')
     {
         if (!empty($string))
@@ -59,5 +71,79 @@ class ChallengerMode
             return $this->handle . $separator . $string;
         }
         return $this->handle;
+    }
+
+
+    public function getSpaceIdFromAPI(string $slug) 
+    {
+        return $this->get('/spaces/search?slug=' . $slug);
+    }
+
+
+    public function getTeamFromAPI(string $teamId)
+    {
+        $team = $this->get('/tournaments/lineups/' . $teamId);
+        
+        if ($team) 
+        {
+            return $result = [$teamId => $team];
+        }
+        return false;
+    }
+
+
+    public function getTeamsFromAPI(array $teamIds)
+    {
+        foreach($teamIds as $id)
+        {
+            $team = $this->getTeamFromAPI($id);
+            if ($team)
+            {
+                $results[] = $team;
+            }
+        }
+        return $results ? $results : false;
+    }
+
+
+    public function getTournamentIdsFromAPI() 
+    {
+        $space_id = get_option($this->prefix('challengermode-space-id'));
+
+        if ($space_id) 
+        {
+            $tournaments = $this->get('/tournaments/search?space_id=' . $space_id);
+            if ($tournaments) {
+                return $tournaments->ids;
+            }
+        }
+        return false;
+    }
+
+
+
+
+    public function getTournamentFromAPI(string $id)
+    {
+        $tournament = $this->get('/tournaments/' . $id);
+
+        if ($tournament) {
+            return $tournament;
+        }
+        return false;
+    }
+
+
+    public function getTournamentsFromAPI(array $ids)
+    {   
+        foreach($ids as $id) 
+        {
+            $tournament = $this->getTournamentFromAPI($id);
+            
+            if ($tournament) {
+                $results[$id] = $tournament;
+            }
+        }
+        return $results ? $results : false;
     }
 }
