@@ -13,12 +13,12 @@ class ChallengerMode
 
     protected function __construct(string $handle, string $refreshKey, bool $debug = false)
     {
-        $this->handle                   = kbwp::slugify($handle);
-        $this->apiUri                   = 'https://publicapi.challengermode.com/mk1/v1';
-        $this->refreshKey               = $refreshKey;
-        $this->debug                    = $debug;
-        $this->accessToken              = new ChallengerMode\AccessToken($this->handle, $this->refreshKey, $this->debug);
-        self::$instances[$this->handle]    = $this;
+        $this->handle                       = kbwp::slugify($handle);
+        $this->apiUri                       = 'https://publicapi.challengermode.com/mk1/v1';
+        $this->refreshKey                   = $refreshKey;
+        $this->debug                        = $debug;
+        $this->accessToken                  = new ChallengerMode\AccessToken($this->handle, $this->refreshKey, $this->debug);
+        self::$instances[$this->handle]     = $this;
     }
 
 
