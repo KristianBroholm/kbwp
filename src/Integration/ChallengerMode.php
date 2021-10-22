@@ -10,6 +10,7 @@ class ChallengerMode
     protected $refreshKey;
     protected $debug;
     protected $accessToken;
+    protected $spaceId;
 
     protected function __construct(string $handle, string $refreshKey, bool $debug = false)
     {
@@ -18,6 +19,8 @@ class ChallengerMode
         $this->refreshKey                   = $refreshKey;
         $this->debug                        = $debug;
         $this->accessToken                  = new ChallengerMode\AccessToken($this->handle, $this->refreshKey, $this->debug);
+        delete_option($this->prefix('challengermode-space-id'));
+        $this->spaceId                      = $this->setSpaceId();
         self::$instances[$this->handle]     = $this;
     }
 
@@ -64,6 +67,29 @@ class ChallengerMode
     }
 
 
+    protected function setSpaceId()
+    {
+        $id = get_option($this->prefix('challengermode-space-id'));
+
+        if (!$id) {
+            $id = $this->getSpaceIdFromAPI();
+            
+            if ($id)
+            {
+                add_option($this->prefix('challengermode-space-id'), $id);
+            }
+        }
+        return $id;
+    }
+
+
+    protected function getSpaceId()
+    {
+        $id = get_option($this->prefix('challengermode-space-id'));
+        return $id;
+    }
+
+
     public function prefix(string $string = '', string $separator = '_')
     {
         if (!empty($string))
@@ -74,9 +100,15 @@ class ChallengerMode
     }
 
 
-    public function getSpaceIdFromAPI(string $slug) 
+    public function getSpaceIdFromAPI() 
     {
-        return $this->get('/spaces/search?slug=' . $slug);
+        $response = $this->get('/spaces/search?slug=' . $this->handle);
+        if (is_array($response->ids))
+        {
+            $id = $response->ids[0];
+            return $id;
+        }
+        return null;
     }
 
 
@@ -108,7 +140,7 @@ class ChallengerMode
 
     public function getTournamentIdsFromAPI() 
     {
-        $space_id = get_option($this->prefix('challengermode-space-id'));
+        $space_id = $this->getSpaceId();
 
         if ($space_id) 
         {
@@ -119,8 +151,6 @@ class ChallengerMode
         }
         return false;
     }
-
-
 
 
     public function getTournamentFromAPI(string $id)
