@@ -82,19 +82,23 @@ abstract class Extension
     {
         if ( in_array( $_ENV['WP_ENV'], $environments ) )
         {
-            if ( ( $disableIfAdmin && !is_user_logged_in() ) || !$disableIfAdmin )
+            add_action('init', function() use ($id, $disableIfAdmin) 
             {
-                $this->addAction('wp_head', function() use ($id) {
-                    echo '<!-- // Google Analytics -->';
-                    echo '<script async src="https://www.googletagmanager.com/gtag/js?id=' . $id . '"></script>';
-                    echo '<script>';
-                    echo 'window.dataLayer = window.dataLayer || [];';
-                    echo 'function gtag(){dataLayer.push(arguments);}';
-                    echo 'gtag(\'js\', new Date());';
-                    echo 'gtag(\'config\', \'' . $id . '\');';
-                    echo '</script>';
-                }, 2);
-            }
+                if ( ( $disableIfAdmin && !is_user_logged_in() ) || !$disableIfAdmin )
+                {
+                    add_action('wp_head', function() use ($id) {
+                        echo '<!-- // Google Analytics -->';
+                        echo '<script async src="https://www.googletagmanager.com/gtag/js?id=' . $id . '"></script>';
+                        echo '<script>';
+                        echo 'window.dataLayer = window.dataLayer || [];';
+                        echo 'function gtag(){dataLayer.push(arguments);}';
+                        echo 'gtag(\'js\', new Date());';
+                        echo 'gtag(\'config\', \'' . $id . '\');';
+                        echo '</script>';
+                    }, 2);
+                }
+            });
+            
         }
         $return = ($return_obj ? $this : true);
         return $return;
