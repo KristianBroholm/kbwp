@@ -4,7 +4,7 @@ use kbwp\kbwp as kbwp;
 
 class FaceIt 
 {
-    private $_instances = [];
+    private static $_instances = [];
     private $_api_key;
     private $_id;
     private $_debug;
@@ -15,20 +15,20 @@ class FaceIt
         $this->_api_key         = $api_key;
         $this->_id              = $id;
         $this->_debug           = $debug_mode_enabled;
-        $this->_api_url         = 'https://open.faceit.com/data/v4/';
+        $this->_api_url         = 'https://open.faceit.com/data/v4';
         self::$_instances[$id]  = $this;
     }
 
     public static function init(string $id, string $api_key, bool $debug_mode_enabled = false)
     {
-        if (in_array($id, self::$_instances))
+        if (array_key_exists($id, self::$_instances))
         {
-            return self::$instances[$id];
+            return self::$_instances[$id];
         }
         return new self($id, $api_key, $debug_mode_enabled);
     }
 
-    public function get_from_API(string $endpoint, bool $json_decode = true)
+    public function get(string $endpoint, bool $json_decode = true)
     {
         $url = $this->_api_url . $endpoint;
 
