@@ -51,7 +51,7 @@ class FaceIt
 
         if (200 === $response['response']['code'])
         {
-            return $json_decode ? json_decode($response['body'], true) : $response['body'];
+            return $json_decode ? json_decode($response['body'], false) : $response['body'];
         }
         return false;
     }    
