@@ -44,15 +44,16 @@ class FaceIt
             ]
         );
 
-        if ($this->_debug)
-        {
-            kbwp::log($response);
-        }
-
         if (200 === $response['response']['code'])
         {
             return $json_decode ? json_decode($response['body'], false) : $response['body'];
         }
+
+        if ($this->_debug)
+        {
+            kbwp::log($response);
+        }
+        
         return false;
     }    
 }
