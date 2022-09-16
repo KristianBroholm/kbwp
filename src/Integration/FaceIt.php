@@ -44,6 +44,8 @@ class FaceIt
             ]
         );
 
+        if (is_a($response, 'WP_Error')) return false;
+        
         if (200 === $response['response']['code'])
         {
             return $json_decode ? json_decode($response['body'], false) : $response['body'];
