@@ -33,7 +33,9 @@ class AppAccessToken
     {   
         if ($this->exists()) {
             $token = $this->getTokenFromDatabase();
-            if ($token['timestamp'] + $token['expires_in'] > time()) {
+            $timestamp = $token['timestamp'] ?? time();
+            $expires_in = $token['expires_in'] ?? 0;
+            if ($timestamp + $expires_in > time()) {
                 return $token;
             }
         }
@@ -69,7 +71,7 @@ class AppAccessToken
 
     private function storeTokenToDatabase($data) 
     {
-        $object = json_decode($data);
+        $object = json_decode($data) ?? new \stdClass();
         $object->{'timestamp'} = time();
         
         $json = json_encode($object);

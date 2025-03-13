@@ -43,7 +43,7 @@ class FaceIt
                 'headers'   => $headers
             ]
         );
-
+        
         if (is_a($response, 'WP_Error')) return false;
         
         if (200 === $response['response']['code'])

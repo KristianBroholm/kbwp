@@ -19,12 +19,11 @@ abstract class kbwp {
         return $string;
     }
 
-
     public static function log($variable)
     {
-      echo '<pre>';
-      print_r($variable);
-      die();
+        echo '<pre>';
+        print_r($variable);
+        die();
     }
 
 
